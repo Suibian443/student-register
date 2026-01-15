@@ -18,26 +18,30 @@ let currentSort = 'roll';
             return; // Stop execution
         }
         
-        // 2. Ensure bar stays HIDDEN (Redundant safety)
-        if (navBar) navBar.style.display = 'none';
+        // 2. Ensure bar stays HIDDEN
+        if (navBar) navBar.style.setProperty('display', 'none', 'important');
     } 
     else {
-        // ✅ USER IS LOGGED IN: NOW we show the bar
-        if (navBar) navBar.style.display = 'flex'; 
+        // ✅ USER IS LOGGED IN: FORCE BAR TO SHOW
+        // We use 'important' here to override the CSS rule
+        if (navBar) navBar.style.setProperty('display', 'flex', 'important');
 
         // Restore the Main Page view if needed
         const pinOverlay = document.getElementById('pinOverlay');
         const mainContent = document.getElementById('mainContent');
-        if (pinOverlay && mainContent) {
+
+        if (isLogged === "true" && pinOverlay && mainContent) {
             currentUserRole = savedRole || 'guest';
             pinOverlay.style.display = 'none';
             mainContent.style.display = 'block';
-            if (currentUserRole === 'admin') document.body.classList.add('admin-mode');
+
+            if (currentUserRole === 'admin') {
+                document.body.classList.add('admin-mode');
+            }
             setTimeout(displayStudents, 50);
         }
     }
 })();
-
 
 // =========================================================
 // 2. LOGIN & LOGOUT LOGIC
