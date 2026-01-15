@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Register</title>
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Force the Login Card to be Dark in Dark Mode */
+        [data-theme="dark"] .pin-box {
+            background-color: #1e1e1e !important; /* Dark Grey Card */
+            border: 1px solid #444 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+        }
+
+        /* Force Text to be White */
+        [data-theme="dark"] .pin-box h3,
+        [data-theme="dark"] .pin-box p {
+            color: #ffffff !important;
+        }
+
+        /* Force Input Field to be Dark with White Text */
+        [data-theme="dark"] #pinInput {
+            background-color: #2d2d2d !important; /* Dark Input */
+            color: #ffffff !important;             /* White Text */
+            border: 2px solid #555 !important;
+            caret-color: #ffffff !important;       /* 🛑 MAKES CURSOR VISIBLE */
+        }
+
+        /* Force Input Focus State */
+        [data-theme="dark"] #pinInput:focus {
+            background-color: #333 !important;
+            border-color: #9290C3 !important; /* Your Purple Color */
+        }
+    </style>
+
+
+<style>
+    /* 1. Make space at bottom */
+    body { padding-bottom: 70px !important; }
+
+    /* 2. The Floating Bar */
+    .bottom-nav {
+        position: fixed !important;
+        bottom: 15px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        
+        width: 75% !important;       /* 🛑 WIDER (65% -> 75%) */
+        max-width: 350px !important; /* Increased max-width slightly */
+        height: 48px !important;
+        
+        background-color: #ffffff !important; 
+        
+        display: flex !important;
+        justify-content: space-evenly !important;
+        align-items: center !important;
+        
+        border-radius: 30px !important;
+        
+        /* 🛑 HIGH CONTRAST UPDATES FOR LIGHT THEME */
+        border: 1px solid #c0c0c0 !important; /* Darker border */
+        box-shadow: 0 12px 35px rgba(0,0,0,0.25) !important; /* Stronger/Darker Shadow */
+        
+        z-index: 9999 !important;
+    }
+
+    /* 3. DARK MODE BAR (Kept the same) */
+    [data-theme="dark"] .bottom-nav {
+        background-color: #2c2c2c !important; 
+        border: 1px solid #444 !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+    }
+
+    /* 4. The Buttons */
+    .nav-item {
+        background: transparent !important;
+        border: none !important;
+        color: #999 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 9px !important;
+        width: auto !important;
+        height: 100% !important;
+        padding: 0 5px !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        position: relative !important;
+    }
+
+    .nav-icon {
+        font-size: 20px !important;
+        margin-bottom: 2px !important;
+        display: block !important;
+        transition: transform 0.2s !important;
+    }
+
+    /* 5. ACTIVE STATE */
+    .nav-item.active {
+        color: #9b59b6 !important;
+        font-weight: bold !important;
+    }
+    
+    /* The Long Line */
+    .nav-item.active::after {
+        content: '' !important;
+        position: absolute !important;
+        bottom: 5px !important;
+        width: 36px !important;
+        height: 3px !important;
+        background-color: #9b59b6 !important;
+        border-radius: 10px !important;
+    }
+
+    /* 6. DARK MODE ACTIVE STATE */
+    [data-theme="dark"] .nav-item.active {
+        color: #e0b0ff !important;
+    }
+    
+    [data-theme="dark"] .nav-item.active::after {
+        background-color: #e0b0ff !important;
+        box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important;
+    }
+    
+    /* Bounce effect */
+    .nav-item.active .nav-icon {
+        transform: translateY(-2px) !important;
+    }
+</style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#9b59b6">
+
+
+</head>
+<body>
+
+
+<div id="pinOverlay" class="overlay">
+    <div class="pin-box">
+        <div class="pin-icon">🔐</div>
+        <h3>Student Register</h3>
+        <p class="pin-subtitle">Please enter your PIN to continue</p>
+        
+        <input type="password" id="pinInput" placeholder="••••" maxlength="4">
+        
+        <div class="pin-buttons">
+            <button onclick="checkPin('admin')" class="btn-admin">Admin</button>
+            <button onclick="checkPin('guest')" class="btn-guest">Guest</button>
+        </div>
+    </div>
+</div>
+
+
+
+    <div class="container" id="mainContent" style="display:none;">
+        <div class="header">
+            <h2>Student Register</h2>
+            <button id="themeToggle" onclick="toggleTheme()">🌙</button>
+        </div>
+
+<details class="admin-tools">
+    <summary>⚙️ Tools</summary>
+    <div class="top-controls">
+        <button onclick="exportToCSV()" class="btn-secondary">📊</button>
+        <button onclick="backupJSON()" class="btn-secondary">📥</button>
+        <button onclick="document.getElementById('importFile').click()" class="btn-secondary">📤</button>
+        <button onclick="window.print()" class="btn-secondary">🖨️</button>
+<button onclick="logout()" class="btn-delete">🔒</button>
+        <button onclick="clearAllData()" class="btn-delete admin-only">🗑️</button>
+
+        <input type="file" id="importFile" style="display:none" onchange="restoreJSON(event)">
+    </div>
+</details>
+
+        
+        <div class="dashboard" id="statsDashboard"></div>
+
+<details class="admin-only" id="studentFormDetails">
+    <summary class="add-student-toggle">Add New Student</summary>
+    
+    <div class="input-group">
+        <input type="hidden" id="editIndex">
+        <input type="text" id="name" placeholder="Student Name *">
+        <input type="number" id="roll" placeholder="Roll Number *">
+        <select id="class">
+            <option value="">Select Class</option>
+            <option value="6">Class 6</option>
+            <option value="7">Class 7</option>
+            <option value="8">Class 8</option>
+            <option value="9">Class 9</option>
+            <option value="10">Class 10</option>
+        </select>
+        <input type="text" id="guardian" placeholder="Guardian Name">
+        <input type="tel" id="phone" placeholder="Phone">
+        <input type="text" id="notes" placeholder="Notes">
+        <button id="submitBtn" onclick="saveStudent()">Save Student</button>
+    </div>
+</details>
+
+
+        <hr>
+
+<div class="filter-bar">
+<input type="text" id="search" placeholder="Search Name, Roll, or Notes..." onkeyup="displayStudents()">
+    
+    <div class="filter-row">
+        <select id="filterClass" onchange="displayStudents()">
+            <option value="">All Classes</option>
+            <option value="6">Class 6</option>
+            <option value="7">Class 7</option>
+            <option value="8">Class 8</option>
+            <option value="9">Class 9</option>
+            <option value="10">Class 10</option>
+        </select>
+
+        <select id="sortDropdown" onchange="setSort(this.value)">
+            <option value="roll">Sort: Roll No</option>
+            <option value="name">Sort: Name (A-Z)</option>
+            <option value="notes">Sort: Notes</option>
+        </select>
+    </div>
+</div>
+
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Roll</th>
+                        <th>Class</th>
+                        <th>Guardian</th>
+                        <th>Phone</th>
+                        <th>Notes</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="studentList"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+
+<div id="toast-box">Notification Message</div>
+
+
+<div class="bottom-nav">
+    <button onclick="window.location.href='index.html'" class="nav-item active">
+        <span class="nav-icon">👨‍🎓</span>
+    </button>
+    
+    <button onclick="window.location.href='attendance.html'" class="nav-item">
+        <span class="nav-icon">📅</span>
+    </button>
+   
+
+    <button onclick="window.location.href='results.html'" class="nav-item">
+        <span class="nav-icon">📊</span>
+    </button>
+</div>
+
+
+
+<script src="script.js"></script>
+
+
+</body>
+
+</html>

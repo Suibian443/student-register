@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Attendance - Student Register</title>
+    <link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#9b59b6">
+
+    <style>
+        /* Base Layout */
+        body { padding-bottom: 50px; transition: background 0.3s; }
+        .attendance-header { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        .date-picker { flex: 2; padding: 12px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); }
+        select { flex: 1; }
+        
+        /* Student Card */
+        .attendance-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        
+        .student-info h4 { margin: 0; font-size: 16px; color: var(--text); }
+        .student-info p { margin: 5px 0 0; font-size: 13px; color: var(--placeholder); }
+
+        /* Buttons */
+        .action-group { display: flex; gap: 10px; align-items: center; }
+        
+        .toggle-btn {
+            padding: 8px 0;
+            width: 80px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            transition: 0.2s;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        /* Light Mode Status Colors */
+        .status-p { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .status-a { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+
+        /* Dark Mode Status Overrides (So they aren't too bright) */
+        [data-theme="dark"] .status-p { background: #064e3b; color: #a7f3d0; border-color: #059669; }
+        [data-theme="dark"] .status-a { background: #7f1d1d; color: #fecaca; border-color: #b91c1c; }
+
+        .history-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: var(--card); padding: 25px; border-radius: 20px; width: 85%; max-width: 350px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: popUp 0.3s ease;
+        }
+        @keyframes popUp { from {transform: scale(0.8); opacity:0;} to {transform: scale(1); opacity:1;} }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 20px 0; }
+        .day-box { height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 11px; background: var(--bg); color: var(--placeholder); }
+        .day-present { background: #27ae60; color: white; }
+        .day-absent { background: #e74c3c; color: white; }
+        
+        .close-btn { background: var(--text); color: var(--bg); border: none; padding: 10px 20px; border-radius: 50px; font-weight: bold; width: 100%; margin-top: 10px; }
+    </style>
+
+<style>
+    /* 1. Make space at bottom */
+    body { padding-bottom: 70px !important; }
+
+    /* 2. The Floating Bar */
+    .bottom-nav {
+        position: fixed !important;
+        bottom: 15px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        
+        width: 75% !important;       /* 🛑 WIDER (65% -> 75%) */
+        max-width: 350px !important; /* Increased max-width slightly */
+        height: 48px !important;
+        
+        background-color: #ffffff !important; 
+        
+        display: flex !important;
+        justify-content: space-evenly !important;
+        align-items: center !important;
+        
+        border-radius: 30px !important;
+        
+        /* 🛑 HIGH CONTRAST UPDATES FOR LIGHT THEME */
+        border: 1px solid #c0c0c0 !important; /* Darker border */
+        box-shadow: 0 12px 35px rgba(0,0,0,0.25) !important; /* Stronger/Darker Shadow */
+        
+        z-index: 9999 !important;
+    }
+
+    /* 3. DARK MODE BAR (Kept the same) */
+    [data-theme="dark"] .bottom-nav {
+        background-color: #2c2c2c !important; 
+        border: 1px solid #444 !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+    }
+
+    /* 4. The Buttons */
+    .nav-item {
+        background: transparent !important;
+        border: none !important;
+        color: #999 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 9px !important;
+        width: auto !important;
+        height: 100% !important;
+        padding: 0 5px !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        position: relative !important;
+    }
+
+    .nav-icon {
+        font-size: 20px !important;
+        margin-bottom: 2px !important;
+        display: block !important;
+        transition: transform 0.2s !important;
+    }
+
+    /* 5. ACTIVE STATE */
+    .nav-item.active {
+        color: #9b59b6 !important;
+        font-weight: bold !important;
+    }
+    
+    /* The Long Line */
+    .nav-item.active::after {
+        content: '' !important;
+        position: absolute !important;
+        bottom: 5px !important;
+        width: 36px !important;
+        height: 3px !important;
+        background-color: #9b59b6 !important;
+        border-radius: 10px !important;
+    }
+
+    /* 6. DARK MODE ACTIVE STATE */
+    [data-theme="dark"] .nav-item.active {
+        color: #e0b0ff !important;
+    }
+    
+    [data-theme="dark"] .nav-item.active::after {
+        background-color: #e0b0ff !important;
+        box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important;
+    }
+    
+    /* Bounce effect */
+    .nav-item.active .nav-icon {
+        transform: translateY(-2px) !important;
+    }
+</style>
+
+
+
+</head>
+<body>
+
+
+
+    <div class="container">
+        <div class="header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <h3 style="margin:0; color:var(--text);">Attendance</h3>
+            </div>
+            <button class="theme-toggle" id="themeBtn" onclick="toggleLocalTheme()">🌙</button>
+        </div>
+
+        <div class="attendance-header">
+            <input type="date" id="attDate" class="date-picker" onchange="loadAttendance()">
+            <select id="attClass" onchange="loadAttendance()">
+                <option value="6">Class 6</option>
+                <option value="7">Class 7</option>
+                <option value="8">Class 8</option>
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+            </select>
+        </div>
+
+        <div class="dashboard" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+            <div class="stat-card" style="background:#27ae60; color:white;">
+                <span class="stat-label">Present</span>
+                <span class="stat-value" id="countPresent">0</span>
+            </div>
+            <div class="stat-card" style="background:#e74c3c; color:white;">
+                <span class="stat-label">Absent</span>
+                <span class="stat-value" id="countAbsent">0</span>
+            </div>
+        </div>
+
+        <div id="attendanceList"></div>
+    </div>
+
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Student History</h3>
+            <p id="modalSubtitle" style="color:var(--placeholder); font-size:13px;">Attendance for this month</p>
+            
+            <div style="display:flex; justify-content:center; gap:15px; margin:15px 0;">
+                <div class="stat-card" style="padding:10px; min-width:80px;">
+                    <span style="font-size:12px; display:block;">Present</span>
+                    <strong style="color:#27ae60; font-size:18px;" id="modalPresent">0</strong>
+                </div>
+                <div class="stat-card" style="padding:10px; min-width:80px;">
+                    <span style="font-size:12px; display:block;">Absent</span>
+                    <strong style="color:#e74c3c; font-size:18px;" id="modalAbsent">0</strong>
+                </div>
+            </div>
+
+            <div class="calendar-grid" id="modalGrid"></div>
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+
+<div class="bottom-nav">
+    <button onclick="window.location.href='index.html'" class="nav-item">
+        <span class="nav-icon">👨‍🎓</span>
+    </button>
+    
+    <button onclick="window.location.href='attendance.html'" class="nav-item active">
+        <span class="nav-icon">📅</span>
+    </button>
+    
+    <button onclick="window.location.href='results.html'" class="nav-item">
+        <span class="nav-icon">📊</span>
+    </button>
+</div>
+
+
+    <script>
+        // 1. Initialize & Theme Check
+        window.onload = function() {
+            // Apply Saved Theme
+            const savedTheme = localStorage.getItem("theme") || "light";
+            document.body.setAttribute("data-theme", savedTheme);
+            updateThemeIcon(savedTheme);
+
+            // Setup Date
+            document.getElementById('attDate').valueAsDate = new Date();
+            loadAttendance();
+        };
+
+        // 2. Theme Logic (Specific to this page)
+        function toggleLocalTheme() {
+            const current = document.body.getAttribute("data-theme");
+            const newTheme = current === "dark" ? "light" : "dark";
+            
+            document.body.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme); // Save for other pages
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById("themeBtn");
+            btn.innerText = theme === "dark" ? "☀️" : "🌙";
+        }
+
+        // 3. Load List
+        function loadAttendance() {
+            const listContainer = document.getElementById("attendanceList");
+            const selectedDate = document.getElementById("attDate").value;
+            const selectedClass = document.getElementById("attClass").value;
+            
+            const students = JSON.parse(localStorage.getItem("students")) || [];
+            const attendanceData = JSON.parse(localStorage.getItem("attendance_records")) || {};
+            
+            const classStudents = students.filter(s => s.studentClass === selectedClass);
+            classStudents.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+            let html = "";
+            let pCount = 0;
+            let aCount = 0;
+
+            if (classStudents.length === 0) {
+                listContainer.innerHTML = `<div style="text-align:center; padding:30px; color:var(--placeholder);">No students in Class ${selectedClass}.</div>`;
+                updateStats(0, 0);
+                return;
+            }
+
+            classStudents.forEach(s => {
+                const key = `${selectedDate}_${s.studentClass}_${s.roll}`;
+                const isPresent = attendanceData[key] === true;
+
+                if(isPresent) pCount++; else aCount++;
+
+                const btnClass = isPresent ? "status-p" : "status-a";
+                const btnText = isPresent ? "PRESENT" : "ABSENT";
+
+                html += `
+                <div class="attendance-card">
+                    <div class="student-info">
+                        <h4>${s.name}</h4>
+                        <p>Roll: ${s.roll}</p>
+                    </div>
+                    <div class="action-group">
+                        <button class="history-btn" onclick="openHistory('${s.roll}', '${s.name}', '${s.studentClass}')">📜</button>
+                        <button class="toggle-btn ${btnClass}" onclick="toggleStatus('${key}')">${btnText}</button>
+                    </div>
+                </div>`;
+            });
+
+            listContainer.innerHTML = html;
+            updateStats(pCount, aCount);
+        }
+
+        function toggleStatus(key) {
+            let attendanceData = JSON.parse(localStorage.getItem("attendance_records")) || {};
+            attendanceData[key] = !attendanceData[key];
+            localStorage.setItem("attendance_records", JSON.stringify(attendanceData));
+            loadAttendance();
+        }
+
+        function updateStats(p, a) {
+            document.getElementById("countPresent").innerText = p;
+            document.getElementById("countAbsent").innerText = a;
+        }
+
+        // 4. Modal Logic
+        function openHistory(roll, name, studentClass) {
+            const modal = document.getElementById("historyModal");
+            const grid = document.getElementById("modalGrid");
+            const attendanceData = JSON.parse(localStorage.getItem("attendance_records")) || {};
+            
+            const dateInput = document.getElementById("attDate").value; 
+            const [year, month] = dateInput.split("-"); 
+            const daysInMonth = new Date(year, month, 0).getDate(); 
+
+            document.getElementById("modalTitle").innerText = name;
+            document.getElementById("modalSubtitle").innerText = `Attendance for ${year}-${month}`;
+
+            let pCount = 0, aCount = 0, gridHTML = "";
+
+            for(let d = 1; d <= daysInMonth; d++) {
+                const dayString = d.toString().padStart(2, '0');
+                const checkDate = `${year}-${month}-${dayString}`;
+                const key = `${checkDate}_${studentClass}_${roll}`;
+                
+                let dayClass = "";
+                if (attendanceData.hasOwnProperty(key)) {
+                    if (attendanceData[key] === true) { dayClass = "day-present"; pCount++; } 
+                    else { dayClass = "day-absent"; aCount++; }
+                }
+                gridHTML += `<div class="day-box ${dayClass}">${d}</div>`;
+            }
+            grid.innerHTML = gridHTML;
+            document.getElementById("modalPresent").innerText = pCount;
+            document.getElementById("modalAbsent").innerText = aCount;
+            modal.style.display = "flex";
+        }
+        function closeModal() { document.getElementById("historyModal").style.display = "none"; }
+    </script>
+</body>
+</html>
+

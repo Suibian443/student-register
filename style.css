@@ -1,0 +1,456 @@
+
+/* THE MAGIC FIX: Prevents the "Zoomed In" / Overflow issue */
+* {
+    box-sizing: border-box;
+}
+
+
+/* 1. Variables and Themes */
+:root {
+    /* Light Mode */
+    --bg: #f3f4f6;         /* Very Light Grey */
+    --card: #ffffff;
+    --text: #2c3e50;       /* Dark Blue-Grey Main Text */
+    
+    /* YOUR NEW COLOR PALETTE */
+    --primary: #9290C3;      /* The Purple you asked for */
+    --primary-hover: #7d7bb5;/* Slightly darker for hover */
+    --btn-text: #1a1a2e;     /* Dark Navy text FOR BUTTONS (High Contrast) */
+    
+    --border: #d1d5db;
+    --input-bg: #ffffff;
+    --placeholder: #6b7280;
+}
+
+[data-theme="dark"] {
+    /* Dark Mode (High Contrast Fix) */
+    --bg: #000000;         /* Pure Black for max contrast */
+    --card: #121212;       /* Dark Grey Cards */
+    --text: #ffffff;       /* Pure White Main Text */
+    
+    --primary: #9290C3;    /* Keep the Purple */
+    --primary-hover: #a6a4d0;
+    --btn-text: #000000;   /* Black text inside purple buttons for readability */
+    
+    --border: #333333;
+    --input-bg: #1e1e1e;
+    --placeholder: #bbbbbb; /* Lighter placeholder so you can see it */
+}
+
+/* Base Settings */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Force Headers to update color in Dark Mode */
+h2, h3, h4 { color: var(--text); }
+
+
+
+.container {
+    width: 95%;
+    max-width: 600px; /* Optimized for mobile */
+    margin: 20px auto;
+    background: var(--card);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h2 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+
+/* Top Utility Buttons */
+.top-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 20px; }
+
+/* Dashboard Cards */
+.dashboard { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); 
+    gap: 8px; 
+    margin-bottom: 20px; 
+}
+.stat-card { background: var(--primary); color: white; padding: 15px; border-radius: 10px; text-align: center; }
+.stat-label { display: block; font-size: 0.8rem; opacity: 0.9; }
+.stat-value { font-size: 1.4rem; font-weight: bold; }
+
+/* Forms and Filters */
+.input-group, .filter-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.admin-only { display: none; }
+.admin-mode .admin-only { display: grid; }
+
+input, select { padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); outline: none; }
+button { padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; background: var(--primary); color: white; transition: 0.2s; }
+button:hover { filter: brightness(0.9); }
+.btn-secondary { background: #5f6368; }
+.btn-delete { background: #e74c3c !important; }
+.btn-edit { background: #f1c40f; color: black; margin-right: 5px; }
+
+
+/* Professional Lock Screen */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+
+/* ----------------------------------
+   LOGIN SCREEN (Fixed for Dark Mode)
+   ---------------------------------- */
+.pin-box {
+    background: var(--card); /* Uses Theme Color (Dark in Dark Mode) */
+    padding: 40px 30px;
+    border-radius: 24px;
+    text-align: center;
+    width: 90%;
+    max-width: 350px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    animation: fadeInScale 0.4s ease-out;
+    border: 1px solid var(--border); /* Adds subtle border for visibility */
+}
+
+.pin-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.pin-box h3 {
+    margin: 0;
+    color: var(--text); /* Adapts to White in Dark Mode */
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.pin-subtitle {
+    font-size: 13px;
+    color: var(--placeholder);
+    margin: 8px 0 25px;
+}
+
+#pinInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 24px;
+    text-align: center;
+    letter-spacing: 10px;
+    transition: border-color 0.3s;
+    margin-bottom: 20px;
+    
+    /* CRITICAL FIXES BELOW */
+    background: var(--input-bg); /* Dark background in Dark Mode */
+    color: var(--text);          /* White text in Dark Mode */
+}
+
+#pinInput:focus {
+    border-color: var(--primary);
+    background: var(--input-bg); /* Keeps it dark when typing! */
+    outline: none;
+}
+
+
+
+.pin-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.pin-buttons button {
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: transform 0.1s, filter 0.2s;
+}
+
+
+/* Add this for a nice "click" feel on mobile */
+.pin-buttons button:active {
+    transform: scale(0.95);
+    filter: brightness(0.8);
+}
+
+
+
+.btn-admin { background: #27ae60; color: white; }
+.btn-guest { background: #5f6368; color: white; }
+
+
+/* Table and Mobile Card View */
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+
+@media screen and (max-width: 768px) {
+    table, thead, tbody, th, td, tr { display: block; }
+    thead tr { position: absolute; top: -9999px; left: -9999px; }
+    tr { border: 1px solid var(--border); margin-bottom: 15px; border-radius: 8px; padding: 10px; }
+    td { border: none; position: relative; padding-left: 50%; text-align: right; border-bottom: 1px solid #eee; }
+    td:last-child { border: none; }
+    td:before { position: absolute; left: 10px; width: 45%; padding-right: 10px; content: attr(data-label); font-weight: bold; text-align: left; }
+}
+
+
+/* ADD THIS AT THE VERY BOTTOM FOR NOTIFICATIONS */
+#toast-box {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+    z-index: 2000;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#toast-box.show {
+    opacity: 1;
+    bottom: 50px;
+}
+
+
+/* ----------------------------------
+   SPACE SAVER: Collapsible Menu
+   ---------------------------------- */
+details.admin-tools {
+    margin-bottom: 15px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+details.admin-tools summary {
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    background: var(--bg);
+    list-style: none; /* Hides default arrow */
+    text-align: center;
+    color: var(--text);
+    user-select: none;
+    font-size: 0.9rem;
+}
+
+/* Add a custom arrow */
+details.admin-tools summary::after {
+    content: " ▼";
+    font-size: 0.8em;
+}
+
+details.admin-tools[open] summary::after {
+    content: " ▲";
+}
+
+/* When open, show buttons in a tight grid */
+details.admin-tools .top-controls {
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 buttons per row */
+    gap: 8px;
+    border-top: 1px solid var(--border);
+}
+
+details.admin-tools button {
+    font-size: 11px; /* Smaller text */
+    padding: 8px 4px;
+}
+
+
+
+/* ----------------------------------
+   SPACE SAVER: Add Student Toggle
+   ---------------------------------- */
+details#studentFormDetails {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    /* Optional: adds a slide animation effect */
+    transition: all 0.3s ease;
+}
+
+/* The "Button" look */
+summary.add-student-toggle {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 8px;
+    list-style: none;
+    user-select: none;
+}
+
+/* Remove default arrow */
+summary.add-student-toggle::-webkit-details-marker {
+    display: none;
+}
+
+/* Change color when open */
+details#studentFormDetails[open] summary.add-student-toggle {
+    background: #444; /* Dark gray to show it's active */
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+details#studentFormDetails[open] summary.add-student-toggle::after {
+    content: " (Tap to Close)";
+    font-size: 0.8em;
+    font-weight: normal;
+    opacity: 0.8;
+}
+
+/* Spacing for the form inside */
+details#studentFormDetails .input-group {
+    padding: 15px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+
+/* ----------------------------------
+   LAYOUT FIX: Split Dropdowns 50/50
+   ---------------------------------- */
+.filter-bar {
+    display: flex;
+    flex-direction: column; /* Stacks Search on top of the row */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-row {
+    display: flex; /* Puts the dropdowns side-by-side */
+    gap: 10px;     /* Space between them */
+}
+
+.filter-row select {
+    flex: 1;       /* Forces them to take equal width */
+    width: 100%;   /* Ensures they fill their half */
+    cursor: pointer;
+}
+
+
+
+/* =========================================
+   FORCE FIX FOR DARK MODE LOGIN SCREEN
+   Paste this at the very bottom of style.css
+   ========================================= */
+
+/* 1. Force the Card to be Dark Grey */
+[data-theme="dark"] .pin-box {
+    background-color: #1e1e1e !important; /* Dark Grey Background */
+    border: 1px solid #444 !important;     /* Dark Border */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
+}
+
+/* 2. Force the Text to be White */
+[data-theme="dark"] .pin-box h3, 
+[data-theme="dark"] .pin-box .pin-subtitle {
+    color: #ffffff !important;
+}
+
+/* 3. Force the Input Box (Where you type the PIN) to be Dark */
+[data-theme="dark"] #pinInput {
+    background-color: #2d2d2d !important; /* Dark Input Background */
+    color: #ffffff !important;             /* White Text/Dots */
+    border-color: #555 !important;
+}
+
+/* 4. Force Focus State (When you tap to type) */
+[data-theme="dark"] #pinInput:focus {
+    background-color: #333 !important;
+    border-color: var(--primary) !important;
+}
+
+
+/* =========================================
+   BOTTOM NAVIGATION BAR
+   ========================================= */
+body {
+    padding-bottom: 80px; /* Adds space so content isn't hidden behind the bar */
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    background: var(--card); /* Adapts to Dark Mode automatically */
+    display: flex;
+    justify-content: space-around; /* Spreads icons evenly */
+    align-items: center;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    backdrop-filter: blur(10px); /* Glass effect */
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--placeholder);
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+    height: 100%;
+}
+
+.nav-icon {
+    font-size: 24px;
+    margin-bottom: 2px;
+    display: block;
+}
+
+/* Hover/Active Effect */
+.nav-item:active {
+    transform: scale(0.9);
+}
+
+.nav-item:hover, .nav-item.active {
+    color: var(--primary); /* Highlights the text */
+}
+
+/* Dark Mode Tweaks */
+[data-theme="dark"] .bottom-nav {
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+}
