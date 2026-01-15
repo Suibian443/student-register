@@ -1,5 +1,5 @@
 // =========================================================
-// 1. SECURITY & SESSION RESTORATION (Runs Immediately)
+// 1. SECURITY & INITIALIZATION (Runs Immediately)
 // =========================================================
 (function secureApp() {
     const isLogged = sessionStorage.getItem("isLoggedIn");
@@ -15,7 +15,6 @@
     }
 
     // 🔄 2. UI RESTORATION (Wait for page to be ready)
-    // We use window.onload to be 100% sure all HTML elements exist
     window.addEventListener('load', () => {
         const navBar = document.querySelector('.bottom-nav');
         const pinOverlay = document.getElementById('pinOverlay');
@@ -23,7 +22,7 @@
 
         // CASE A: User is LOGGED IN
         if (isLogged === "true") {
-            // 1. Force the Bar to Show (The Fix)
+            // 1. Force the Bar to Show
             if (navBar) {
                 navBar.style.setProperty('display', 'flex', 'important');
             }
@@ -53,8 +52,8 @@
     });
 })();
 
-// 🚨 SAFETY NET: This runs repeatedly to guarantee the bar appears
-// This fixes the "Refresh" bug by constantly forcing the bar visible if logged in
+// 🚨 SAFETY NET: GUARANTEE BAR VISIBILITY
+// This runs every 500ms to force the bar to appear if it accidentally hides
 setInterval(() => {
     const isLogged = sessionStorage.getItem("isLoggedIn");
     const navBar = document.querySelector('.bottom-nav');
@@ -64,25 +63,28 @@ setInterval(() => {
             navBar.style.setProperty('display', 'flex', 'important');
         }
     }
-}, 500); // Checks every half-second
+}, 500);
 
 // =========================================================
 // 2. HELPER: Highlight Active Icon
 // =========================================================
 function highlightActiveIcon(path) {
     const buttons = document.querySelectorAll('.nav-item');
+    if (!buttons || buttons.length < 3) return;
+
     buttons.forEach(btn => btn.classList.remove('active')); // Reset all
     
-    if (buttons.length >= 3) {
-        if (path.includes("attendance.html")) buttons[1].classList.add('active');
-        else if (path.includes("results.html")) buttons[2].classList.add('active');
-        else buttons[0].classList.add('active'); // Default to Student
-    }
+    if (path.includes("attendance.html")) buttons[1].classList.add('active');
+    else if (path.includes("results.html")) buttons[2].classList.add('active');
+    else buttons[0].classList.add('active'); // Default to Student
 }
 
 // =========================================================
 // 3. LOGIN & LOGOUT LOGIC
 // =========================================================
+let currentUserRole = 'guest'; // Default
+let currentSort = 'roll';
+
 function checkPin(role) {
     const inputField = document.getElementById('pinInput');
     const input = inputField.value;
@@ -90,6 +92,8 @@ function checkPin(role) {
     const guestPin = "0000";
 
     if ((role === 'admin' && input === adminPin) || (role === 'guest' && input === guestPin)) {
+        currentUserRole = role;
+
         // 1. Save Session
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("userRole", role);
@@ -120,18 +124,11 @@ function logout() {
 }
 
 // =========================================================
-// 4. STUDENT MANAGEMENT (Rest of your code...)
-// =========================================================
-// (Keep all your existing functions below this line: saveStudent, displayStudents, etc.)
-// PASTE THE REST OF YOUR FUNCTIONS HERE (saveStudent, displayStudents, etc.)
-
-
-
-// =========================================================
-// 3. STUDENT MANAGEMENT (CRUD)
+// 4. STUDENT MANAGEMENT (CRUD)
 // =========================================================
 function saveStudent() {
     let name = document.getElementById("name").value.trim();
+    // Capitalize Name
     name = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
     const roll = document.getElementById("roll").value.trim();
@@ -146,6 +143,8 @@ function saveStudent() {
     }
 
     let students = JSON.parse(localStorage.getItem("students")) || [];
+    
+    // Duplicate Check
     const isDuplicate = students.some((s, i) => 
         s.roll === roll && s.studentClass === studentClass && i != editIndex
     );
@@ -162,7 +161,10 @@ function saveStudent() {
         students[editIndex] = studentData;
         document.getElementById("editIndex").value = "";
         document.getElementById("submitBtn").innerText = "Add Student";
-        document.getElementById("studentFormDetails").open = false; 
+        
+        // Close the details panel if open
+        const details = document.getElementById("studentFormDetails");
+        if(details) details.open = false; 
     }
 
     localStorage.setItem("students", JSON.stringify(students));
@@ -173,7 +175,7 @@ function saveStudent() {
 
 function displayStudents() {
     const tbody = document.getElementById("studentList");
-    if(!tbody) return; // Guard clause in case we run too early
+    if(!tbody) return; // Guard clause
 
     const searchInput = document.getElementById("search");
     const filterInput = document.getElementById("filterClass");
@@ -198,6 +200,9 @@ function displayStudents() {
     });
 
     tbody.innerHTML = "";
+    
+    // Check Role for buttons
+    const role = sessionStorage.getItem("userRole") || 'guest';
 
     students.forEach((s) => {
         const nameMatch = (s.name || "").toLowerCase().includes(search);
@@ -210,7 +215,7 @@ function displayStudents() {
         const matchesFilter = filter === "" || s.studentClass === filter;
 
         if (matchesSearch && matchesFilter) {
-            const actions = (currentUserRole === 'admin') ? 
+            const actions = (role === 'admin') ? 
                 `<button onclick="editStudent('${s.roll}', '${s.studentClass}')" class="btn-edit">Edit</button>
                  <button onclick="deleteStudent('${s.roll}', '${s.studentClass}')" class="btn-delete">Delete</button>` : 
                 `<span>View Only</span>`;
@@ -270,7 +275,10 @@ function deleteStudent(roll, studentClass) {
 }
 
 function resetForm() {
-    ["name", "roll", "class", "guardian", "phone", "notes"].forEach(id => document.getElementById(id).value = "");
+    ["name", "roll", "class", "guardian", "phone", "notes"].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = "";
+    });
     document.getElementById("editIndex").value = "";
     document.getElementById("submitBtn").innerText = "Add Student";
 }
@@ -281,7 +289,7 @@ function setSort(criteria) {
 }
 
 // =========================================================
-// 4. UTILITIES (Toast, Stats, Theme)
+// 5. UTILITIES (Toast, Stats, Theme)
 // =========================================================
 function showToast(message) {
     const toast = document.getElementById("toast-box");
@@ -296,12 +304,15 @@ function updateDashboard() {
     const students = JSON.parse(localStorage.getItem("students")) || [];
     const counts = { "6": 0, "7": 0, "8": 0, "9": 0, "10": 0 };
     students.forEach(s => { if(counts[s.studentClass] !== undefined) counts[s.studentClass]++; });
+    
+    const dashboard = document.getElementById("statsDashboard");
+    if (!dashboard) return;
+
     let html = `<div class="stat-card"><span class="stat-label">Total</span><span class="stat-value">${students.length}</span></div>`;
     Object.keys(counts).forEach(cls => { 
         html += `<div class="stat-card"><span class="stat-label">Class ${cls}</span><span class="stat-value">${counts[cls]}</span></div>`; 
     });
-    const dashboard = document.getElementById("statsDashboard");
-    if(dashboard) dashboard.innerHTML = html;
+    dashboard.innerHTML = html;
 }
 
 function toggleTheme() {
@@ -329,14 +340,13 @@ function clearAllData() {
 }
 
 // =========================================================
-// 5. EXPORT & BACKUP (Corrected)
+// 6. EXPORT & BACKUP
 // =========================================================
 function exportToCSV() {
     let students = JSON.parse(localStorage.getItem("students")) || [];
     let attendanceData = JSON.parse(localStorage.getItem("attendance_records")) || {};
     let resultsData = JSON.parse(localStorage.getItem("results_data")) || {};
 
-    // 🛑 LIMITED TO 3 SUBJECTS AS REQUESTED
     const subjects = ['Math', 'English', 'Science'];
     const standardExams = ['MidTerm', 'Final']; 
 
@@ -347,7 +357,7 @@ function exportToCSV() {
     let csv = header + "\n";
 
     students.forEach(s => {
-        // Attendance
+        // Attendance Count
         let present = 0, absent = 0;
         const uniqueId = `_${s.studentClass}_${s.roll}`;
         Object.keys(attendanceData).forEach(key => {
