@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Results - Student Register</title>
     <link rel="stylesheet" href="style.css">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#9b59b6">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#9b59b6">
 
     <style>
         /* Base Styles */
-        body { padding-bottom: 50px; }
+        body { padding-bottom: 70px !important; } /* Space for bar */
         .controls-row { display: flex; gap: 10px; margin-bottom: 15px; }
         select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); width: 100%; }
 
-        /* Action Buttons (Gear & Trophy) */
+        /* Action Buttons */
         .btn-mini {
             padding: 0 15px; font-size: 18px; background: var(--card);
             border: 1px solid var(--border); border-radius: 8px; cursor: pointer; color: var(--text);
@@ -32,7 +32,6 @@
         .student-info h4 { margin: 0; font-size: 16px; color: var(--text); }
         .student-info p { margin: 5px 0 0; font-size: 13px; color: var(--placeholder); }
 
-        /* Inputs & Buttons inside Card */
         .card-actions { display: flex; align-items: center; gap: 10px; }
         
         .score-input {
@@ -91,105 +90,83 @@
         .prog-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease; }
         
         .btn-close { width:100%; padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-weight:bold; margin-top:15px; }
+    
+        /* 🛑 WIDER CAPSULE NAV (High Contrast) 🛑 */
+        /* 2. The Floating Bar */
+        .bottom-nav {
+            position: fixed !important;
+            bottom: 15px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            
+            width: 75% !important;       /* 🛑 WIDER */
+            max-width: 350px !important; 
+            height: 48px !important;
+            
+            background-color: #ffffff !important; 
+            
+            display: none !important; /* Hidden by default until JS loads */
+            justify-content: space-evenly !important;
+            align-items: center !important;
+            
+            border-radius: 30px !important;
+            
+            /* High Contrast for Light Theme */
+            border: 1px solid #c0c0c0 !important;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25) !important;
+            
+            z-index: 9999 !important;
+        }
+
+        /* DARK MODE BAR */
+        [data-theme="dark"] .bottom-nav {
+            background-color: #2c2c2c !important; 
+            border: 1px solid #444 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+        }
+
+        /* The Buttons */
+        .nav-item {
+            background: transparent !important;
+            border: none !important;
+            color: #999 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 9px !important;
+            width: auto !important;
+            height: 100% !important;
+            padding: 0 5px !important;
+            margin: 0 !important;
+            cursor: pointer !important;
+            position: relative !important;
+        }
+
+        .nav-icon {
+            font-size: 20px !important;
+            margin-bottom: 2px !important;
+            display: block !important;
+            transition: transform 0.2s !important;
+        }
+
+        /* ACTIVE STATE */
+        .nav-item.active { color: #9b59b6 !important; font-weight: bold !important; }
+        
+        .nav-item.active::after {
+            content: '' !important;
+            position: absolute !important;
+            bottom: 5px !important;
+            width: 36px !important;
+            height: 3px !important;
+            background-color: #9b59b6 !important;
+            border-radius: 10px !important;
+        }
+
+        [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
+        [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
+        .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
     </style>
-
-<style>
-    /* 1. Make space at bottom */
-    body { padding-bottom: 70px !important; }
-
-    /* 2. The Floating Bar */
-    .bottom-nav {
-        position: fixed !important;
-        bottom: 15px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        
-        width: 75% !important;       /* 🛑 WIDER (65% -> 75%) */
-        max-width: 350px !important; /* Increased max-width slightly */
-        height: 48px !important;
-        
-        background-color: #ffffff !important; 
-        
-        display: none !important;
-        justify-content: space-evenly !important;
-        align-items: center !important;
-        
-        border-radius: 30px !important;
-        
-        /* 🛑 HIGH CONTRAST UPDATES FOR LIGHT THEME */
-        border: 1px solid #c0c0c0 !important; /* Darker border */
-        box-shadow: 0 12px 35px rgba(0,0,0,0.25) !important; /* Stronger/Darker Shadow */
-        
-        z-index: 9999 !important;
-    }
-
-    /* 3. DARK MODE BAR (Kept the same) */
-    [data-theme="dark"] .bottom-nav {
-        background-color: #2c2c2c !important; 
-        border: 1px solid #444 !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
-    }
-
-    /* 4. The Buttons */
-    .nav-item {
-        background: transparent !important;
-        border: none !important;
-        color: #999 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 9px !important;
-        width: auto !important;
-        height: 100% !important;
-        padding: 0 5px !important;
-        margin: 0 !important;
-        cursor: pointer !important;
-        position: relative !important;
-    }
-
-    .nav-icon {
-        font-size: 20px !important;
-        margin-bottom: 2px !important;
-        display: block !important;
-        transition: transform 0.2s !important;
-    }
-
-    /* 5. ACTIVE STATE */
-    .nav-item.active {
-        color: #9b59b6 !important;
-        font-weight: bold !important;
-    }
-    
-    /* The Long Line */
-    .nav-item.active::after {
-        content: '' !important;
-        position: absolute !important;
-        bottom: 5px !important;
-        width: 36px !important;
-        height: 3px !important;
-        background-color: #9b59b6 !important;
-        border-radius: 10px !important;
-    }
-
-    /* 6. DARK MODE ACTIVE STATE */
-    [data-theme="dark"] .nav-item.active {
-        color: #e0b0ff !important;
-    }
-    
-    [data-theme="dark"] .nav-item.active::after {
-        background-color: #e0b0ff !important;
-        box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important;
-    }
-    
-    /* Bounce effect */
-    .nav-item.active .nav-icon {
-        transform: translateY(-2px) !important;
-    }
-</style>
-
-
-
 </head>
 <body>
 
@@ -267,22 +244,22 @@
         </div>
     </div>
 
-<div class="bottom-nav">
-<div class="bottom-nav">
-    <button onclick="window.location.href='index.html'" class="nav-item">
-        <span class="nav-icon">👨‍🎓</span>
-    </button>
-    
-    <button onclick="window.location.href='attendance.html'" class="nav-item">
-        <span class="nav-icon">📅</span>
+    <div class="bottom-nav">
+        <button onclick="window.location.href='index.html'" class="nav-item">
+            <span class="nav-icon">👨‍🎓</span>
+            
+        </button>
         
-    </button>
-    
-    <button onclick="window.location.href='results.html'" class="nav-item active">
-        <span class="nav-icon">📊</span>
-    </button>
-</div>
-
+        <button onclick="window.location.href='attendance.html'" class="nav-item">
+            <span class="nav-icon">📅</span>
+            
+        </button>
+        
+        <button onclick="window.location.href='results.html'" class="nav-item active">
+            <span class="nav-icon">📊</span>
+            
+        </button>
+    </div>
 
     <script>
         // 1. Initialize
@@ -456,7 +433,7 @@
                 return { name: s.name, score: score, roll: s.roll };
             });
 
-            // 3. Filter out those with 0 score (Optional: Keep if you want) and Sort
+            // 3. Filter out those with 0 score and Sort
             scoredStudents = scoredStudents.filter(s => s.score > 0);
             scoredStudents.sort((a, b) => b.score - a.score);
 
@@ -475,57 +452,55 @@
                     html += `
                     <div class="rank-item rank-${index+1}">
                         <div style="display:flex; align-items:center;">
-                            <span class="rank-badge">${index+1}</span>
-                            <div>
-                                <strong style="color:var(--text)">${s.name}</strong>
-                                <div style="font-size:11px; color:var(--placeholder)">Roll: ${s.roll}</div>
-                            </div>
+                            <div class="rank-badge">${index+1}</div>
+                            <strong>${s.name}</strong>
                         </div>
-                        <strong style="font-size:18px; color:var(--primary)">${s.score}</strong>
+                        <span>${s.score}</span>
                     </div>`;
                 });
                 lbList.innerHTML = html;
             }
-
             document.getElementById("leaderboardModal").style.display = "flex";
         }
 
-        // 5. 📈 STUDENT PROGRESS LOGIC
+        // 5. 📈 PROGRESS LOGIC (Restored from backup)
         function openStudentProgress(roll, name) {
-            const selectedClass = document.getElementById("resClass").value;
-            const subject = document.getElementById("subject").value;
-            const key = getStorageKey(); // Get list of exams for this subject
-            let tests = JSON.parse(localStorage.getItem(key)) || ["Mid-Term", "Final Exam"];
-            const allResults = JSON.parse(localStorage.getItem("results_data")) || {};
-
             document.getElementById("progTitle").innerText = name;
+            const subject = document.getElementById("subject").value;
             document.getElementById("progSubject").innerText = subject;
+
+            const selectedClass = document.getElementById("resClass").value;
+            const keyPrefix = getStorageKey(); 
+            let tests = JSON.parse(localStorage.getItem(keyPrefix)) || ["Mid-Term", "Final Exam"];
+            
+            const allResults = JSON.parse(localStorage.getItem("results_data")) || {};
             const progList = document.getElementById("progressList");
 
             let html = "";
             let hasData = false;
 
-            tests.forEach(testName => {
-                const resKey = `${testName}_${subject}_${selectedClass}_${roll}`;
-                const score = allResults[resKey] || 0;
-                const scoreDisplay = allResults[resKey] ? allResults[resKey] : "Not Taken";
+            tests.forEach(test => {
+                const key = `${test}_${subject}_${selectedClass}_${roll}`;
+                const score = parseInt(allResults[key]);
                 
-                // Only show graph if score exists
-                if(allResults[resKey]) hasData = true;
-
-                // Simple Bar Calculation (Assume 100 is max)
-                let width = Math.min(score, 100); 
-
-                html += `
-                <div class="prog-row">
-                    <div class="prog-label">
-                        <span>${testName}</span>
-                        <strong>${scoreDisplay}</strong>
-                    </div>
-                    <div class="prog-bar-bg">
-                        <div class="prog-bar-fill" style="width:${width}%"></div>
-                    </div>
-                </div>`;
+                if(!isNaN(score)) {
+                    hasData = true;
+                    // Calculate Color
+                    let color = "#e74c3c"; // Red
+                    if(score >= 80) color = "#27ae60"; // Green
+                    else if(score >= 33) color = "#f1c40f"; // Yellow
+                    
+                    html += `
+                    <div class="prog-row">
+                        <div class="prog-label">
+                            <span>${test}</span>
+                            <span>${score}%</span>
+                        </div>
+                        <div class="prog-bar-bg">
+                            <div class="prog-bar-fill" style="width:${score}%; background:${color};"></div>
+                        </div>
+                    </div>`;
+                }
             });
 
             if(!hasData) html = "<p style='text-align:center; color:var(--placeholder)'>No exams taken yet.</p>";
@@ -533,8 +508,8 @@
 
             document.getElementById("progressModal").style.display = "flex";
         }
-
     </script>
+    
     <script src="script.js"></script>
 
 </body>
