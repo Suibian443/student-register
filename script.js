@@ -4,33 +4,34 @@
 let currentUserRole = 'guest';
 let currentSort = 'roll';
 
-(function initApp() {
-    const isLogged = sessionStorage.getItem("isLoggedIn");
-    const savedRole = sessionStorage.getItem("userRole");
-    const path = window.location.pathname;
-    const navBar = document.querySelector('.bottom-nav');
+// 🛑 SECURITY: Check this IMMEDIATELY (Before page loads)
+const isLogged = sessionStorage.getItem("isLoggedIn");
+const path = window.location.pathname;
 
-    // 🛑 STRICT SECURITY CHECK
+if (isLogged !== "true") {
+    // If trying to access protected pages, KICK THEM OUT immediately
+    if (path.includes("attendance.html") || path.includes("results.html")) {
+        window.location.href = "index.html"; 
+    }
+}
+
+// ⏳ UI LOADER: Wait for the HTML to be ready before finding the bar
+document.addEventListener('DOMContentLoaded', () => {
+    const navBar = document.querySelector('.bottom-nav');
+    const pinOverlay = document.getElementById('pinOverlay');
+    const mainContent = document.getElementById('mainContent');
+    const savedRole = sessionStorage.getItem("userRole");
+
+    // 1. If NOT logged in -> Keep Bar Hidden
     if (isLogged !== "true") {
-        // 1. If trying to access protected pages, KICK THEM OUT immediately
-        if (path.includes("attendance.html") || path.includes("results.html")) {
-            window.location.href = "index.html"; 
-            return; // Stop execution
-        }
-        
-        // 2. Ensure bar stays HIDDEN
         if (navBar) navBar.style.setProperty('display', 'none', 'important');
     } 
     else {
-        // ✅ USER IS LOGGED IN: FORCE BAR TO SHOW
-        // We use 'important' here to override the CSS rule
+        // 2. If LOGGED IN -> Show Bar (Override CSS)
         if (navBar) navBar.style.setProperty('display', 'flex', 'important');
 
-        // Restore the Main Page view if needed
-        const pinOverlay = document.getElementById('pinOverlay');
-        const mainContent = document.getElementById('mainContent');
-
-        if (isLogged === "true" && pinOverlay && mainContent) {
+        // 3. Restore Main Page View (if we are on index.html)
+        if (pinOverlay && mainContent) {
             currentUserRole = savedRole || 'guest';
             pinOverlay.style.display = 'none';
             mainContent.style.display = 'block';
@@ -41,7 +42,18 @@ let currentSort = 'roll';
             setTimeout(displayStudents, 50);
         }
     }
-})();
+    
+    // 4. Force Active State on Buttons (Fixes the "Purple Line")
+    // This ensures the correct button lights up based on the file name
+    const buttons = document.querySelectorAll('.nav-item');
+    buttons.forEach(btn => btn.classList.remove('active')); // Reset all
+    
+    if (path.includes("attendance.html") && buttons[1]) buttons[1].classList.add('active');
+    else if (path.includes("results.html") && buttons[2]) buttons[2].classList.add('active');
+    else if (buttons[0]) buttons[0].classList.add('active'); // Default to Student
+});
+
+
 
 // =========================================================
 // 2. LOGIN & LOGOUT LOGIC
