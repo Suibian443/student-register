@@ -10,35 +10,31 @@ let currentSort = 'roll';
     const path = window.location.pathname;
     const navBar = document.querySelector('.bottom-nav');
 
-    // 🛑 SECURITY CHECK: If NOT logged in...
+    // 🛑 STRICT SECURITY CHECK
     if (isLogged !== "true") {
-        // ...and trying to access Attendance or Results pages...
+        // 1. If trying to access protected pages, KICK THEM OUT immediately
         if (path.includes("attendance.html") || path.includes("results.html")) {
-            window.location.href = "index.html"; // 🦵 Kick them back to Login
-            return; // Stop everything else
+            window.location.href = "index.html"; 
+            return; // Stop execution
         }
         
-        // ...and if we are on the Login Screen, HIDE the bottom bar
+        // 2. Ensure bar stays HIDDEN (Redundant safety)
         if (navBar) navBar.style.display = 'none';
     } 
     else {
-        // ✅ IF LOGGED IN:
-        if (navBar) navBar.style.display = 'flex'; // Show the bottom bar
-    }
+        // ✅ USER IS LOGGED IN: NOW we show the bar
+        if (navBar) navBar.style.display = 'flex'; 
 
-    // 🔄 RESTORE SESSION (If on Main Page)
-    const pinOverlay = document.getElementById('pinOverlay');
-    const mainContent = document.getElementById('mainContent');
-
-    if (isLogged === "true" && pinOverlay && mainContent) {
-        currentUserRole = savedRole || 'guest';
-        pinOverlay.style.display = 'none';
-        mainContent.style.display = 'block';
-
-        if (currentUserRole === 'admin') {
-            document.body.classList.add('admin-mode');
+        // Restore the Main Page view if needed
+        const pinOverlay = document.getElementById('pinOverlay');
+        const mainContent = document.getElementById('mainContent');
+        if (pinOverlay && mainContent) {
+            currentUserRole = savedRole || 'guest';
+            pinOverlay.style.display = 'none';
+            mainContent.style.display = 'block';
+            if (currentUserRole === 'admin') document.body.classList.add('admin-mode');
+            setTimeout(displayStudents, 50);
         }
-        setTimeout(displayStudents, 50);
     }
 })();
 
