@@ -1,36 +1,47 @@
 // =========================================================
-// 1. GLOBAL VARIABLES & IMMEDIATE SESSION CHECK
+// 1. GLOBAL VARIABLES & SECURITY GATEKEEPER
 // =========================================================
 let currentUserRole = 'guest';
 let currentSort = 'roll';
 
-// 🛑 THIS RUNS IMMEDIATELY WHEN PAGE LOADS
 (function initApp() {
     const isLogged = sessionStorage.getItem("isLoggedIn");
     const savedRole = sessionStorage.getItem("userRole");
-    
+    const path = window.location.pathname;
+    const navBar = document.querySelector('.bottom-nav');
+
+    // 🛑 SECURITY CHECK: If NOT logged in...
+    if (isLogged !== "true") {
+        // ...and trying to access Attendance or Results pages...
+        if (path.includes("attendance.html") || path.includes("results.html")) {
+            window.location.href = "index.html"; // 🦵 Kick them back to Login
+            return; // Stop everything else
+        }
+        
+        // ...and if we are on the Login Screen, HIDE the bottom bar
+        if (navBar) navBar.style.display = 'none';
+    } 
+    else {
+        // ✅ IF LOGGED IN:
+        if (navBar) navBar.style.display = 'flex'; // Show the bottom bar
+    }
+
+    // 🔄 RESTORE SESSION (If on Main Page)
     const pinOverlay = document.getElementById('pinOverlay');
     const mainContent = document.getElementById('mainContent');
 
-    // If user was already logged in...
     if (isLogged === "true" && pinOverlay && mainContent) {
-        // 1. Restore Role
         currentUserRole = savedRole || 'guest';
-
-        // 2. Hide PIN Screen / Show App
         pinOverlay.style.display = 'none';
         mainContent.style.display = 'block';
 
-        // 3. Apply Admin Visuals if needed
         if (currentUserRole === 'admin') {
             document.body.classList.add('admin-mode');
         }
-
-        // 4. Load Data
-        // We wait a tiny bit to ensure DOM is ready for the table
         setTimeout(displayStudents, 50);
     }
 })();
+
 
 // =========================================================
 // 2. LOGIN & LOGOUT LOGIC
