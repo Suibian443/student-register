@@ -403,7 +403,11 @@ details#studentFormDetails .input-group {
 body {
     padding-bottom: 80px; /* Adds space so content isn't hidden behind the bar */
 }
-
+  .bottom-nav {
+        /* ... keep your other settings like position, width, etc ... */
+        
+        display: none !important; /* 🛑 HIDE IT BY DEFAULT */
+        
 .bottom-nav {
     position: fixed;
     bottom: 0;
