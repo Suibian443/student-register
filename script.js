@@ -49,28 +49,39 @@ let currentSort = 'roll';
 function checkPin(role) {
     const inputField = document.getElementById('pinInput');
     const input = inputField.value;
-    const adminPin = "1578"; 
+    const adminPin = "1578";  // Your PIN
     const guestPin = "0000";
 
     if ((role === 'admin' && input === adminPin) || (role === 'guest' && input === guestPin)) {
         currentUserRole = role;
         
-        // ✅ SAVE SESSION: This fixes the "Back Button" issue
+        // 1. Save Session
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("userRole", role);
 
+        // 2. Unlock Screen
         document.getElementById('pinOverlay').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
         
+        // 🛑 3. FORCE NAVIGATION BAR TO SHOW (The Missing Piece) 🛑
+        const navBar = document.querySelector('.bottom-nav');
+        if (navBar) {
+            navBar.style.setProperty('display', 'flex', 'important');
+        }
+
+        // 4. Admin Mode
         if(role === 'admin') {
             document.body.classList.add('admin-mode');
         }
+        
         displayStudents();
     } else {
         alert("Incorrect PIN!");
         inputField.value = "";
     }
 }
+
+
 
 function logout() {
     // Clear session and reload to show PIN screen
