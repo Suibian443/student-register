@@ -1,91 +1,111 @@
 // =========================================================
-// 1. GLOBAL VARIABLES & SECURITY GATEKEEPER
+// 1. SECURITY & SESSION RESTORATION (Runs Immediately)
 // =========================================================
-let currentUserRole = 'guest';
-let currentSort = 'roll';
-
-// 🛑 SECURITY: Check this IMMEDIATELY (Before page loads)
-const isLogged = sessionStorage.getItem("isLoggedIn");
-const path = window.location.pathname;
-
-if (isLogged !== "true") {
-    // If trying to access protected pages, KICK THEM OUT immediately
-    if (path.includes("attendance.html") || path.includes("results.html")) {
-        window.location.href = "index.html"; 
-    }
-}
-
-// ⏳ UI LOADER: Wait for the HTML to be ready before finding the bar
-document.addEventListener('DOMContentLoaded', () => {
-    const navBar = document.querySelector('.bottom-nav');
-    const pinOverlay = document.getElementById('pinOverlay');
-    const mainContent = document.getElementById('mainContent');
+(function secureApp() {
+    const isLogged = sessionStorage.getItem("isLoggedIn");
     const savedRole = sessionStorage.getItem("userRole");
+    const path = window.location.pathname;
 
-    // 1. If NOT logged in -> Keep Bar Hidden
+    // 🛑 1. SECURITY REDIRECT
+    // If NOT logged in, kick them out of protected pages
     if (isLogged !== "true") {
-        if (navBar) navBar.style.setProperty('display', 'none', 'important');
-    } 
-    else {
-        // 2. If LOGGED IN -> Show Bar (Override CSS)
-        if (navBar) navBar.style.setProperty('display', 'flex', 'important');
-
-        // 3. Restore Main Page View (if we are on index.html)
-        if (pinOverlay && mainContent) {
-            currentUserRole = savedRole || 'guest';
-            pinOverlay.style.display = 'none';
-            mainContent.style.display = 'block';
-
-            if (currentUserRole === 'admin') {
-                document.body.classList.add('admin-mode');
-            }
-            setTimeout(displayStudents, 50);
+        if (path.includes("attendance.html") || path.includes("results.html")) {
+            window.location.href = "index.html";
         }
     }
-    
-    // 4. Force Active State on Buttons (Fixes the "Purple Line")
-    // This ensures the correct button lights up based on the file name
+
+    // 🔄 2. UI RESTORATION (Wait for page to be ready)
+    // We use window.onload to be 100% sure all HTML elements exist
+    window.addEventListener('load', () => {
+        const navBar = document.querySelector('.bottom-nav');
+        const pinOverlay = document.getElementById('pinOverlay');
+        const mainContent = document.getElementById('mainContent');
+
+        // CASE A: User is LOGGED IN
+        if (isLogged === "true") {
+            // 1. Force the Bar to Show (The Fix)
+            if (navBar) {
+                navBar.style.setProperty('display', 'flex', 'important');
+            }
+
+            // 2. Unlock the Main Page (if we are on it)
+            if (pinOverlay && mainContent) {
+                pinOverlay.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                // Restore Admin Mode if needed
+                if (savedRole === 'admin') {
+                    document.body.classList.add('admin-mode');
+                }
+                
+                // Load the student list
+                setTimeout(displayStudents, 100);
+            }
+
+            // 3. Highlight the correct icon
+            highlightActiveIcon(path);
+        } 
+        // CASE B: User is NOT LOGGED IN
+        else {
+            // Ensure Bar is Hidden
+            if (navBar) navBar.style.setProperty('display', 'none', 'important');
+        }
+    });
+})();
+
+// 🚨 SAFETY NET: This runs repeatedly to guarantee the bar appears
+// This fixes the "Refresh" bug by constantly forcing the bar visible if logged in
+setInterval(() => {
+    const isLogged = sessionStorage.getItem("isLoggedIn");
+    const navBar = document.querySelector('.bottom-nav');
+    if (isLogged === "true" && navBar) {
+        // Only force it if it's currently hidden
+        if (getComputedStyle(navBar).display === 'none') {
+            navBar.style.setProperty('display', 'flex', 'important');
+        }
+    }
+}, 500); // Checks every half-second
+
+// =========================================================
+// 2. HELPER: Highlight Active Icon
+// =========================================================
+function highlightActiveIcon(path) {
     const buttons = document.querySelectorAll('.nav-item');
     buttons.forEach(btn => btn.classList.remove('active')); // Reset all
     
-    if (path.includes("attendance.html") && buttons[1]) buttons[1].classList.add('active');
-    else if (path.includes("results.html") && buttons[2]) buttons[2].classList.add('active');
-    else if (buttons[0]) buttons[0].classList.add('active'); // Default to Student
-});
-
-
+    if (buttons.length >= 3) {
+        if (path.includes("attendance.html")) buttons[1].classList.add('active');
+        else if (path.includes("results.html")) buttons[2].classList.add('active');
+        else buttons[0].classList.add('active'); // Default to Student
+    }
+}
 
 // =========================================================
-// 2. LOGIN & LOGOUT LOGIC
+// 3. LOGIN & LOGOUT LOGIC
 // =========================================================
 function checkPin(role) {
     const inputField = document.getElementById('pinInput');
     const input = inputField.value;
-    const adminPin = "1578";  // Your PIN
+    const adminPin = "1578"; 
     const guestPin = "0000";
 
     if ((role === 'admin' && input === adminPin) || (role === 'guest' && input === guestPin)) {
-        currentUserRole = role;
-        
         // 1. Save Session
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("userRole", role);
 
-        // 2. Unlock Screen
+        // 2. Unlock Interface
         document.getElementById('pinOverlay').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
-        
-        // 🛑 3. FORCE NAVIGATION BAR TO SHOW (The Missing Piece) 🛑
-        const navBar = document.querySelector('.bottom-nav');
-        if (navBar) {
-            navBar.style.setProperty('display', 'flex', 'important');
-        }
 
-        // 4. Admin Mode
+        // 3. Force Nav Bar (Immediate)
+        const navBar = document.querySelector('.bottom-nav');
+        if (navBar) navBar.style.setProperty('display', 'flex', 'important');
+
+        // 4. Set Mode
         if(role === 'admin') {
             document.body.classList.add('admin-mode');
         }
-        
         displayStudents();
     } else {
         alert("Incorrect PIN!");
@@ -93,14 +113,19 @@ function checkPin(role) {
     }
 }
 
-
-
 function logout() {
-    // Clear session and reload to show PIN screen
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("userRole");
     location.reload(); 
 }
+
+// =========================================================
+// 4. STUDENT MANAGEMENT (Rest of your code...)
+// =========================================================
+// (Keep all your existing functions below this line: saveStudent, displayStudents, etc.)
+// PASTE THE REST OF YOUR FUNCTIONS HERE (saveStudent, displayStudents, etc.)
+
+
 
 // =========================================================
 // 3. STUDENT MANAGEMENT (CRUD)
