@@ -139,6 +139,46 @@
         [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
         [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
         .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
+    /* ⬆️⬇️ FLOATING SCROLL BUTTONS */
+    .scroll-controls {
+        position: fixed;
+        bottom: 80px; /* Sits above the nav bar */
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 999;
+    }
+
+    .scroll-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: var(--primary); /* Matches your theme */
+        border: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s;
+        backdrop-filter: blur(2px);
+    }
+    .scroll-btn:active { transform: scale(0.9); }
+    
+    /* Dark Mode Color */
+    [data-theme="dark"] .scroll-btn { background-color: #bb86fc; }
+
+    /* 🏹 THE CSS ARROW CODE (Clean Chevrons) */
+    .arrow {
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 4px;
+    }
+    .up { transform: rotate(-135deg); margin-top: 4px; }
+    .down { transform: rotate(45deg); margin-bottom: 2px; }
+
     </style>
 </head>
 <body>
@@ -220,6 +260,15 @@
         </button>
         <button onclick="window.location.href='results.html'" class="nav-item active">
             <span class="nav-icon">📊</span>
+        </button>
+    </div>
+
+        <div class="scroll-controls">
+        <button class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <span class="arrow up"></span>
+        </button>
+        <button class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">
+            <span class="arrow down"></span>
         </button>
     </div>
 
@@ -474,7 +523,7 @@
         }
     </script>
     
-    <script src="script.js?v=30435"></script>
+    <script src="script.js?v=30495"></script>
 
 </body>
 </html>
