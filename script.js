@@ -310,11 +310,12 @@ function showToast(message) {
     } else { alert(message); }
 }
 
-function updateDashboard() {
+
+    function updateDashboard() {
     const students = JSON.parse(localStorage.getItem("students")) || [];
     const counts = { "6": 0, "7": 0, "8": 0, "9": 0, "10": 0 };
     
-    // Count students per class
+    // Count students
     students.forEach(s => { 
         if(counts[s.studentClass] !== undefined) counts[s.studentClass]++; 
     });
@@ -324,35 +325,32 @@ function updateDashboard() {
     
     const currentFilter = document.getElementById("filterClass").value;
 
-    // 🛑 DEFINE YOUR EXACT ORDER HERE:
-    // Row 1: 7, 8, 9
-    // Row 2: 6, Total, 10
+    // 🛑 YOUR ARCH ORDER: Top Row (7,8,9) -> Bottom Row (6, Total, 10)
     const cardOrder = ["7", "8", "9", "6", "Total", "10"];
 
     let html = "";
 
     cardOrder.forEach(key => {
-        // CASE A: The "Total" Card (Special Style)
+        // A. TOTAL CARD
         if (key === "Total") {
             html += `
             <div class="stat-card is-total">
-                <span class="stat-label">Total</span>
-                <span class="stat-value">${students.length}</span>
+                <span style="font-size:12px; opacity:0.8;">Total</span>
+                <span style="font-size:24px; font-weight:bold;">${students.length}</span>
             </div>`;
         } 
-        // CASE B: The Class Cards
+        // B. CLASS CARDS
         else {
             const count = counts[key];
-            let classes = "stat-card";
+            let cssClass = "is-filled"; // Default Purple
             
-            // Apply Styles
-            if (key === currentFilter) classes += " is-active"; // Purple if active
-            else if (count === 0) classes += " is-zero";        // Faded if empty
-            
+            if (key === currentFilter) cssClass = "is-active"; // Selected (Bright)
+            else if (count === 0) cssClass = "is-normal";      // Empty (Grey)
+
             html += `
-            <div class="${classes}" onclick="filterByCard('${key}')" style="cursor:pointer">
-                <span class="stat-label">Class ${key}</span>
-                <span class="stat-value">${count}</span>
+            <div class="stat-card ${cssClass}" onclick="filterByCard('${key}')">
+                <span style="font-size:12px; opacity:0.8;">Class ${key}</span>
+                <span style="font-size:24px; font-weight:bold;">${count}</span>
             </div>`;
         }
     });
@@ -360,13 +358,17 @@ function updateDashboard() {
     dashboard.innerHTML = html;
 }
 
-// Helper function (Keep this if you haven't added it yet)
+// Ensure this helper exists too
 function filterByCard(cls) {
     const filter = document.getElementById("filterClass");
-    filter.value = cls;
-    displayStudents(); 
-    updateDashboard(); 
+    if(filter) {
+        filter.value = cls;
+        displayStudents();
+        updateDashboard();
+    }
 }
+
+    
 
 function toggleTheme() {
     const current = document.body.getAttribute('data-theme') || "light";
