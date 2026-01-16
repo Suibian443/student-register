@@ -144,14 +144,23 @@ function saveStudent() {
 
     let students = JSON.parse(localStorage.getItem("students")) || [];
     
-    // Duplicate Check
-    const isDuplicate = students.some((s, i) => 
-        s.roll === roll && s.studentClass === studentClass && i != editIndex
-    );
+    // ... existing code ...
+let students = JSON.parse(localStorage.getItem("students")) || [];
 
-    if (isDuplicate) {
-        return showToast(`⚠️ Roll ${roll} is already taken in Class ${studentClass}!`);
-    }
+// CHECK FOR DUPLICATES
+const isDuplicate = students.some(s => 
+    s.roll === roll && 
+    s.studentClass === studentClass && 
+    document.getElementById("editIndex").value === "" // Only check on NEW students, not edits
+);
+
+if (isDuplicate) {
+    alert(`⚠️ Error: Roll number ${roll} already exists in Class ${studentClass}!`);
+    return; // Stop the function
+}
+
+// ... continue with saving ...
+
 
     const studentData = { name, roll, studentClass, guardian, phone, notes };
 
