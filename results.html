@@ -80,7 +80,7 @@
         }
         
         .rank-badge { 
-            width: 35px; height: 35px; border-radius: 50%; 
+            width: 40px; height: 40px; border-radius: 50%; 
             background: var(--bg); color: var(--text); 
             display: flex; align-items: center; justify-content: center; 
             font-size: 18px; margin-right: 12px;
@@ -185,7 +185,7 @@
             <h3 style="margin-top:0; color:var(--text);">Manage Tests</h3>
             <p style="font-size:12px; color:var(--placeholder); margin-bottom:15px;">For <span id="modalSubjectName"></span></p>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="newTestName" placeholder="Ex: Trigonometry" style="padding:10px; border-radius:8px; border:1px solid var(--border); width:100%;">
+                <input type="text" id="newTestName" placeholder="Ex: M. Chapter 1" style="padding:10px; border-radius:8px; border:1px solid var(--border); width:100%;">
                 <button onclick="addNewTest()" style="background:var(--primary); color:white; border:none; padding:0 15px; border-radius:8px; font-weight:bold;">+</button>
             </div>
             <div id="testList" style="max-height:200px; overflow-y:auto; margin-bottom:15px; border:1px solid var(--border); border-radius:8px;"></div>
@@ -195,7 +195,7 @@
 
     <div id="leaderboardModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color:var(--text); text-align:center;">Leaderboard</h3>
+            <h3 style="margin-top:0; color:var(--text); text-align:center;">⚜️Leaderboard⚜️</h3>
             <p id="lbSubtitle" style="text-align:center; color:var(--placeholder); font-size:12px; margin-bottom:15px;"></p>
             <div id="leaderboardList" style="overflow-y:auto; flex:1;"></div>
             <button class="btn-close" onclick="closeModals()">Close</button>
@@ -407,9 +407,9 @@
                     let rankDisplay = index + 1;
                     if(index === 0) rankDisplay = "👑";
                     else if(index === 1) rankDisplay = "💎";
-                    else if(index === 2) rankDisplay = "🎖️";
+                    else if(index === 2) rankDisplay = "⭐";
                     else if(index === 3) rankDisplay = "🏅";
-                    else if(index === 4) rankDisplay = "⭐";
+                    else if(index === 4) rankDisplay = "🎖️";
 
                     html += `
                     <div class="rank-item rank-${index+1}">
@@ -474,7 +474,7 @@
         }
     </script>
     
-    <script src="script.js?v=30005"></script>
+    <script src="script.js?v=30405"></script>
 
 </body>
 </html>
