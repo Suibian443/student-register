@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,20 +13,12 @@
     <style>
         /* Base Styles */
         body { padding-bottom: 70px !important; }
-        
-        /* CONTROLS LAYOUT */
         .controls-row { display: flex; gap: 10px; margin-bottom: 10px; }
         
-        /* Dropdowns */
         select { 
-            flex: 1; /* Takes equal space */
-            padding: 12px; 
-            border-radius: 8px; 
-            border: 1px solid var(--border); 
-            background: var(--card); 
-            color: var(--text); 
-            width: 100%; 
-            font-size: 14px;
+            flex: 1; padding: 12px; border-radius: 8px; 
+            border: 1px solid var(--border); background: var(--card); 
+            color: var(--text); width: 100%; font-size: 14px;
         }
 
         /* Action Buttons */
@@ -77,15 +71,71 @@
         .modal-content {
             background: var(--card); padding: 25px; border-radius: 20px; width: 85%; max-width: 350px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: left; animation: popUp 0.3s ease;
+            max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
         }
         @keyframes popUp { from {transform: scale(0.8); opacity:0;} to {transform: scale(1); opacity:1;} }
 
-        /* LEADERBOARD & PROGRESS */
-        .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; }
-        .rank-badge { width: 25px; height: 25px; border-radius: 50%; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-right: 10px; }
-        .rank-1 .rank-badge { background: #FFD700; color: #000; }
-        .rank-2 .rank-badge { background: #C0C0C0; color: #000; }
-        .rank-3 .rank-badge { background: #CD7F32; color: #000; }
+        /* 🏆 CSS RANK BADGES */
+        .rank-item { 
+            display: flex; justify-content: space-between; padding: 12px; 
+            border-bottom: 1px solid var(--border); align-items: center; 
+        }
+        
+        .rank-badge { 
+            width: 36px; height: 36px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 800; font-size: 16px; margin-right: 12px;
+            color: #fff; /* Default text color for top ranks */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 2px solid transparent; /* Placeholder for border */
+        }
+
+        /* 💎 Rank 1: Diamond (Blue/Purple Gradient & Glow) */
+        .rank-1 .rank-badge {
+            background: linear-gradient(135deg, #00C6FF, #0072FF);
+            box-shadow: 0 0 10px #00C6FF;
+            border-color: #80D8FF;
+        }
+        
+        /* 💠 Rank 2: Platinum (Icy Blue/White Gradient & Glow) */
+        .rank-2 .rank-badge {
+            background: linear-gradient(135deg, #E0F7FA, #80DEEA, #26C6DA);
+            color: #006064; /* Dark text for light background */
+            box-shadow: 0 0 8px #26C6DA;
+            border-color: #B2EBF2;
+        }
+        
+        /* 🥇 Rank 3: Gold (Gold/Yellow Gradient & Glow) */
+        .rank-3 .rank-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA000);
+            box-shadow: 0 0 8px #FFD700;
+            border-color: #FFE082;
+        }
+        
+        /* 🥈 Rank 4: Silver (Silver/Grey Gradient & Glow) */
+        .rank-4 .rank-badge {
+            background: linear-gradient(135deg, #E0E0E0, #9E9E9E);
+            box-shadow: 0 0 6px #E0E0E0;
+            border-color: #F5F5F5;
+            color: #212121;
+        }
+        
+        /* 🥉 Rank 5: Bronze (Bronze/Orange Gradient & Glow) */
+        .rank-5 .rank-badge {
+            background: linear-gradient(135deg, #FFAB91, #D84315);
+            box-shadow: 0 0 6px #FFAB91;
+            border-color: #FFCCBC;
+        }
+
+        /* Rank 6+: Normal Style */
+        .rank-item:not(.rank-1):not(.rank-2):not(.rank-3):not(.rank-4):not(.rank-5) .rank-badge {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: none;
+            font-weight: bold;
+        }
+
         
         .prog-row { margin-bottom: 10px; }
         .prog-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; color: var(--text); }
@@ -161,8 +211,9 @@
         <div class="controls-row">
             <select id="examType" onchange="loadResults()" style="flex:2;">
                 </select>
-            <button class="btn-mini" onclick="openLeaderboard()" style="color:#f1c40f;">🏆</button>
+           
             <button class="btn-mini" onclick="openTestModal()">➕</button>
+            <button class="btn-mini" onclick="openLeaderboard()" style="color:#f1c40f;">🏆</button>
         </div>
 
         <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
@@ -174,12 +225,10 @@
         <div class="modal-content">
             <h3 style="margin-top:0; color:var(--text);">Manage Tests</h3>
             <p style="font-size:12px; color:var(--placeholder); margin-bottom:15px;">For <span id="modalSubjectName"></span></p>
-            
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="newTestName" placeholder="Ex: Trigonometry" style="padding:10px; border-radius:8px; border:1px solid var(--border); width:100%;">
                 <button onclick="addNewTest()" style="background:var(--primary); color:white; border:none; padding:0 15px; border-radius:8px; font-weight:bold;">+</button>
             </div>
-            
             <div id="testList" style="max-height:200px; overflow-y:auto; margin-bottom:15px; border:1px solid var(--border); border-radius:8px;"></div>
             <button class="btn-close" onclick="closeModals()">Close</button>
         </div>
@@ -187,9 +236,11 @@
 
     <div id="leaderboardModal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color:var(--text); text-align:center;">🏆 Top Performers</h3>
+            <h3 style="margin-top:0; color:var(--text); text-align:center;">Leaderboard</h3>
             <p id="lbSubtitle" style="text-align:center; color:var(--placeholder); font-size:12px; margin-bottom:15px;"></p>
-            <div id="leaderboardList"></div>
+            
+            <div id="leaderboardList" style="overflow-y:auto; flex:1;"></div>
+            
             <button class="btn-close" onclick="closeModals()">Close</button>
         </div>
     </div>
@@ -368,7 +419,7 @@
             }
         }
 
-        // 4. LEADERBOARD LOGIC
+        // 4. 🏆 LEADERBOARD LOGIC (Updated for CSS Badges)
         function openLeaderboard() {
             const selectedClass = document.getElementById("resClass").value;
             const exam = document.getElementById("examType").value;
@@ -376,41 +427,16 @@
             const students = JSON.parse(localStorage.getItem("students")) || [];
             const allResults = JSON.parse(localStorage.getItem("results_data")) || {};
 
+            // 1. Get students
             const classStudents = students.filter(s => s.studentClass === selectedClass);
             
+            // 2. Map scores
             let scoredStudents = classStudents.map(s => {
                 const key = `${exam}_${subject}_${s.studentClass}_${s.roll}`;
                 const score = parseInt(allResults[key]) || 0;
-                return { name: s.name, score: score, roll: s.roll };
-            });
+       
 
-            scoredStudents = scoredStudents.filter(s => s.score > 0);
-            scoredStudents.sort((a, b) => b.score - a.score);
-
-            const top5 = scoredStudents.slice(0, 5);
-            const lbList = document.getElementById("leaderboardList");
-            document.getElementById("lbSubtitle").innerText = `${exam} - ${subject} (Class ${selectedClass})`;
-            
-            if (top5.length === 0) {
-                lbList.innerHTML = "<p style='text-align:center'>No marks entered yet.</p>";
-            } else {
-                let html = "";
-                top5.forEach((s, index) => {
-                    html += `
-                    <div class="rank-item rank-${index+1}">
-                        <div style="display:flex; align-items:center;">
-                            <div class="rank-badge">${index+1}</div>
-                            <strong>${s.name}</strong>
-                        </div>
-                        <span>${s.score}</span>
-                    </div>`;
-                });
-                lbList.innerHTML = html;
-            }
-            document.getElementById("leaderboardModal").style.display = "flex";
-        }
-
-        // 5. PROGRESS LOGIC
+// 5. PROGRESS LOGIC
         function openStudentProgress(roll, name) {
             document.getElementById("progTitle").innerText = name;
             const subject = document.getElementById("subject").value;
@@ -456,7 +482,7 @@
         }
     </script>
     
-    <script src="script.js?v=9959"></script>
+    <script src="script.js?v=10001"></script>
 
 </body>
 </html>
