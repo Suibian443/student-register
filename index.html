@@ -325,6 +325,16 @@
         <span class="nav-icon">📊</span>
     </button>
 </div>
+<div class="scroll-controls">
+    <button class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <span class="arrow up"></span>
+    </button>
+    <button class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">
+        <span class="arrow down"></span>
+    </button>
+</div>
+
+
 <script>
     // 🛑 SCROLL VISIBILITY LOGIC
     window.addEventListener('scroll', function() {
@@ -339,7 +349,7 @@
 
 </script>
 
-<script src="script.js?v=95372"></script>
+<script src="script.js?v=95872"></script>
 
 </body>
 </html>
