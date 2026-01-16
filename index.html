@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#9b59b6">
 
     <style>
-        /* Force the Login Card to be Dark in Dark Mode */
+        /* 1. Login & Dark Mode Overrides */
         [data-theme="dark"] .pin-box {
             background-color: #1e1e1e !important;
             border: 1px solid #444 !important;
@@ -27,44 +27,48 @@
             background-color: #333 !important;
             border-color: #9290C3 !important;
         }
-        
-        /* DASHBOARD CARD STYLES */
+
+        /* 2. DASHBOARD GRID LAYOUT (The Arch: 7-8-9 on top, 6-Total-10 bottom) */
+        #statsDashboard {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important; /* 3 Columns */
+            gap: 10px !important;
+            padding: 10px !important;
+            margin-bottom: 20px;
+        }
+
+        /* 3. CARD STYLES */
         .stat-card {
-            transition: transform 0.2s, opacity 0.3s;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            color: white !important; /* Always white text */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 90px;
         }
+        .stat-card:active { transform: scale(0.95); }
 
-        /* 1. TOTAL CARD (Darker/Different) */
-        .stat-card.is-total {
-            background: linear-gradient(135deg, #2c3e50, #4ca1af) !important; /* Dark Slate Blue */
-            color: white !important;
-            border: 1px solid rgba(255,255,255,0.1);
+        /* COLORS */
+        .is-total {
+            background: linear-gradient(135deg, #2c3e50, #4ca1af) !important; /* Blue Gradient */
+            border: 1px solid rgba(255,255,255,0.2);
+            grid-column: 2; /* Forces Total to be in the center of the bottom row */
         }
-
-        /* 2. ACTIVE CLASS (Highlighted) */
-        .stat-card.is-active {
-            background: var(--primary) !important; /* Your Theme Purple */
-            color: white !important;
-            transform: scale(1.05); /* Slight pop */
-            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4);
-            z-index: 2;
+        .is-active {
+            background: #9b59b6 !important; /* Bright Purple */
             border: 2px solid white;
+            transform: scale(1.05);
+            z-index: 10;
         }
+        .is-filled { background: #9b59b6 !important; opacity: 0.85; } /* Standard Purple */
+        .is-normal { background: #95a5a6 !important; } /* Grey for Empty */
 
-        /* 3. ZERO COUNT (Muted) */
-        .stat-card.is-zero {
-            opacity: 0.5; /* Faded */
-            background: var(--card); /* Standard Card Color */
-            border: 1px solid var(--border);
-        }
-        
-        /* 4. DEFAULT (Non-zero, non-active) */
-        .stat-card {
-            background: var(--card);
-            color: var(--text);
-        }
-
-
-        /* Floating Bar Styles */
+        /* 4. FLOATING NAV BAR */
         body { padding-bottom: 70px !important; }
         .bottom-nav {
             position: fixed !important;
@@ -75,7 +79,7 @@
             max-width: 350px !important;
             height: 48px !important;
             background-color: #ffffff !important;
-            display: none !important; /* Hidden by default */
+            display: none !important;
             justify-content: space-evenly !important;
             align-items: center !important;
             border-radius: 30px !important;
@@ -123,50 +127,6 @@
         [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
         [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
         .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
-
-    /* 🎨 DASHBOARD COLORS & LAYOUT (Add this to index.html) */
-    
-    /* 1. Force 3 Columns for the Arch Layout */
-    #statsDashboard {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important; /* 3 cards per row */
-        gap: 10px !important;
-        padding: 10px !important;
-    }
-
-    /* 2. Card Base Style */
-    .stat-card {
-        padding: 15px;
-        border-radius: 12px;
-        text-align: center;
-        color: white !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        cursor: pointer;
-        transition: transform 0.2s;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .stat-card:active { transform: scale(0.95); }
-
-    /* 3. The "Total" Card (Blue/Dark) */
-    .is-total {
-        background: linear-gradient(135deg, #2c3e50, #4ca1af) !important;
-        border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    /* 4. Active/Selected Class (Bright Purple) */
-    .is-active {
-        background: #9b59b6 !important; /* Purple */
-        border: 2px solid white;
-        transform: scale(1.05);
-        z-index: 10;
-    }
-
-    /* 5. Regular/Empty Classes (Faded Purple) */
-    .is-normal { background: #95a5a6 !important; } /* Grey for 0 */
-    .is-filled { background: #9b59b6 !important; opacity: 0.8; } /* Purple for students */
-
     </style>
 </head>
 <body>
@@ -176,9 +136,7 @@
         <div class="pin-icon">🔐</div>
         <h3>Student Register</h3>
         <p class="pin-subtitle">Please enter your PIN to continue</p>
-        
         <input type="password" id="pinInput" placeholder="••••" maxlength="4">
-        
         <div class="pin-buttons">
             <button onclick="checkPin('admin')" class="btn-admin">Admin</button>
             <button onclick="checkPin('guest')" class="btn-guest">Guest</button>
@@ -209,7 +167,6 @@
 
     <details class="admin-only" id="studentFormDetails">
         <summary class="add-student-toggle">Add New Student</summary>
-        
         <div class="input-group">
             <input type="hidden" id="editIndex">
             <input type="text" id="name" placeholder="Student Name *">
@@ -225,7 +182,6 @@
             <input type="text" id="guardian" placeholder="Guardian Name">
             <input type="tel" id="phone" placeholder="Phone">
             <input type="text" id="notes" placeholder="Notes">
-            
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button id="submitBtn" onclick="saveStudent()" style="flex:2;">Add Student</button>
                 <button type="button" onclick="resetForm()" style="flex:1; background:#95a5a6; border:none; color:white; border-radius:5px; cursor:pointer;">Cancel</button>
@@ -236,8 +192,7 @@
     <hr>
 
     <div class="filter-bar">
-        <input type="text" id="search" placeholder="Search Name, Roll, or Notes..." onkeyup="displayStudents()">
-        
+        <input type="text" id="search" placeholder="Search..." onkeyup="displayStudents()">
         <div class="filter-row">
             <select id="filterClass" onchange="displayStudents()">
                 <option value="">All Classes</option>
@@ -247,11 +202,9 @@
                 <option value="9">Class 9</option>
                 <option value="10">Class 10</option>
             </select>
-
             <select id="sortDropdown" onchange="setSort(this.value)">
                 <option value="roll">Sort: Roll No</option>
                 <option value="name">Sort: Name (A-Z)</option>
-                <option value="notes">Sort: Notes</option>
             </select>
         </div>
     </div>
@@ -288,8 +241,7 @@
     </button>
 </div>
 
-<script src="script.js?v=999"></script>
-
+<script src="script.js?v=9999"></script>
 
 </body>
 </html>
