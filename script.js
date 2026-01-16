@@ -285,17 +285,18 @@ function deleteStudent(roll, studentClass) {
 }
 
 function resetForm() {
-    ["name", "roll", "class", "guardian", "phone", "notes"].forEach(id => {
+    // Clear all text inputs
+    ["name", "roll", "guardian", "phone", "notes"].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.value = "";
     });
+    
+    // CRITICAL: Clear the hidden ID so the next save creates a NEW student
     document.getElementById("editIndex").value = "";
-    document.getElementById("submitBtn").innerText = "Add Student";
-}
-
-function setSort(criteria) {
-    currentSort = criteria;
-    displayStudents();
+    
+    // Reset Button Text back to normal
+    const btn = document.getElementById("submitBtn");
+    if(btn) btn.innerText = "Add Student";
 }
 
 // =========================================================
