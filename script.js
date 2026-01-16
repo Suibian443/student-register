@@ -127,6 +127,7 @@ function logout() {
 // 4. STUDENT MANAGEMENT (CRUD)
 // =========================================================
 function saveStudent() {
+    // 1. Get Values
     let name = document.getElementById("name").value.trim();
     // Capitalize Name
     name = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
@@ -136,51 +137,51 @@ function saveStudent() {
     const guardian = document.getElementById("guardian").value;
     const phone = document.getElementById("phone").value;
     const notes = document.getElementById("notes").value;
-    const editIndex = document.getElementById("editIndex").value;
+    const editIndex = document.getElementById("editIndex").value; // This stores the ID of who we are editing
 
+    // 2. Validation
     if (!name || !roll || !studentClass) {
-        return showToast("⚠️ Please fill all required fields!");
+        return showToast("⚠️ Please fill Name, Roll, and Class!");
     }
 
     let students = JSON.parse(localStorage.getItem("students")) || [];
-    
-    // ... existing code ...
-let students = JSON.parse(localStorage.getItem("students")) || [];
 
-// CHECK FOR DUPLICATES
-const isDuplicate = students.some(s => 
-    s.roll === roll && 
-    s.studentClass === studentClass && 
-    document.getElementById("editIndex").value === "" // Only check on NEW students, not edits
-);
+    // 3. DUPLICATE CHECK (Fixed)
+    // We check if "Roll + Class" exists on ANY student EXCEPT the one we are currently editing
+    const isDuplicate = students.some((s, i) => 
+        s.roll.toString() === roll.toString() && 
+        s.studentClass.toString() === studentClass.toString() && 
+        i.toString() !== editIndex.toString() 
+    );
 
-if (isDuplicate) {
-    alert(`⚠️ Error: Roll number ${roll} already exists in Class ${studentClass}!`);
-    return; // Stop the function
-}
+    if (isDuplicate) {
+        return showToast(`⚠️ Error: Roll ${roll} already exists in Class ${studentClass}!`);
+    }
 
-// ... continue with saving ...
-
-
+    // 4. Save Data
     const studentData = { name, roll, studentClass, guardian, phone, notes };
 
     if (editIndex === "") {
+        // CASE A: NEW STUDENT
         students.push(studentData);
+        showToast("✅ Student Added!");
     } else {
+        // CASE B: EDITING EXISTING
         students[editIndex] = studentData;
-        document.getElementById("editIndex").value = "";
-        document.getElementById("submitBtn").innerText = "Add Student";
+        showToast("✅ Student Info Updated!");
         
-        // Close the details panel if open
+        // Close the form
         const details = document.getElementById("studentFormDetails");
-        if(details) details.open = false; 
+        if(details) details.removeAttribute("open");
     }
 
     localStorage.setItem("students", JSON.stringify(students));
-    resetForm();
+    
+    // 5. CRITICAL FIX: Reset the form so we exit "Edit Mode"
     displayStudents();
-    showToast("✅ Student Saved!");
+    resetForm(); 
 }
+
 
 function displayStudents() {
     const tbody = document.getElementById("studentList");
