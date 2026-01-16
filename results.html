@@ -11,8 +11,21 @@
     <style>
         /* Base Styles */
         body { padding-bottom: 70px !important; }
-        .controls-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); width: 100%; }
+        
+        /* CONTROLS LAYOUT */
+        .controls-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        
+        /* Dropdowns */
+        select { 
+            flex: 1; /* Takes equal space */
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            background: var(--card); 
+            color: var(--text); 
+            width: 100%; 
+            font-size: 14px;
+        }
 
         /* Action Buttons */
         .btn-mini {
@@ -125,7 +138,6 @@
             <div style="display:flex; align-items:center; gap:10px;">
                 <div style="line-height:1.2;">
                     <h3 style="margin:0; color:var(--text);">Results</h3>
-                    <small style="color:var(--placeholder); font-size:11px;">Student Register</small>
                 </div>
             </div>
             <button class="theme-toggle" id="themeBtn" onclick="toggleLocalTheme()">🌙</button>
@@ -139,9 +151,6 @@
                 <option value="9">Class 9</option>
                 <option value="10">Class 10</option>
             </select>
-        </div>
-
-        <div class="controls-row">
             <select id="subject" onchange="handleContextChange()">
                 <option value="Math">Math</option>
                 <option value="English">English</option>
@@ -150,7 +159,7 @@
         </div>
 
         <div class="controls-row">
-            <select id="examType" onchange="loadResults()">
+            <select id="examType" onchange="loadResults()" style="flex:2;">
                 </select>
             <button class="btn-mini" onclick="openLeaderboard()" style="color:#f1c40f;">🏆</button>
             <button class="btn-mini" onclick="openTestModal()">➕</button>
@@ -212,6 +221,7 @@
             const savedTheme = localStorage.getItem("theme") || "light";
             document.body.setAttribute("data-theme", savedTheme);
             document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
+            
             loadExamTypes(); 
             loadResults();
         };
@@ -400,7 +410,7 @@
             document.getElementById("leaderboardModal").style.display = "flex";
         }
 
-         // 5. PROGRESS LOGIC
+        // 5. PROGRESS LOGIC
         function openStudentProgress(roll, name) {
             document.getElementById("progTitle").innerText = name;
             const subject = document.getElementById("subject").value;
@@ -446,7 +456,7 @@
         }
     </script>
     
-    <script src="script.js?v=888"></script>
+    <script src="script.js?v=9999"></script>
 
 </body>
 </html>
