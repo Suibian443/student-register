@@ -73,62 +73,30 @@
         }
         @keyframes popUp { from {transform: scale(0.8); opacity:0;} to {transform: scale(1); opacity:1;} }
 
-        /* 🏆 CSS RANK BADGES */
+        /* 🏆 LEADERBOARD STYLES */
         .rank-item { 
             display: flex; justify-content: space-between; padding: 12px; 
             border-bottom: 1px solid var(--border); align-items: center; 
         }
         
         .rank-badge { 
-            width: 36px; height: 36px; border-radius: 50%; 
+            width: 35px; height: 35px; border-radius: 50%; 
+            background: var(--bg); color: var(--text); 
             display: flex; align-items: center; justify-content: center; 
-            font-weight: 800; font-size: 16px; margin-right: 12px;
-            color: #fff; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            border: 2px solid transparent; 
-        }
-
-        /* 💎 Rank 1: Diamond */
-        .rank-1 .rank-badge {
-            background: linear-gradient(135deg, #00C6FF, #0072FF);
-            box-shadow: 0 0 10px #00C6FF;
-            border-color: #80D8FF;
-        }
-        /* 💠 Rank 2: Platinum */
-        .rank-2 .rank-badge {
-            background: linear-gradient(135deg, #E0F7FA, #80DEEA, #26C6DA);
-            color: #006064; 
-            box-shadow: 0 0 8px #26C6DA;
-            border-color: #B2EBF2;
-        }
-        /* 🥇 Rank 3: Gold */
-        .rank-3 .rank-badge {
-            background: linear-gradient(135deg, #FFD700, #FFA000);
-            box-shadow: 0 0 8px #FFD700;
-            border-color: #FFE082;
-        }
-        /* 🥈 Rank 4: Silver */
-        .rank-4 .rank-badge {
-            background: linear-gradient(135deg, #E0E0E0, #9E9E9E);
-            box-shadow: 0 0 6px #E0E0E0;
-            border-color: #F5F5F5;
-            color: #212121;
-        }
-        /* 🥉 Rank 5: Bronze */
-        .rank-5 .rank-badge {
-            background: linear-gradient(135deg, #FFAB91, #D84315);
-            box-shadow: 0 0 6px #FFAB91;
-            border-color: #FFCCBC;
-        }
-        /* Rank 6+: Normal */
-        .rank-item:not(.rank-1):not(.rank-2):not(.rank-3):not(.rank-4):not(.rank-5) .rank-badge {
-            background: var(--bg);
-            color: var(--text);
+            font-size: 18px; margin-right: 12px;
             border: 1px solid var(--border);
-            box-shadow: none;
-            font-weight: bold;
         }
 
+        /* Specific styles for the top 5 just to make the emoji pop a bit more */
+        .rank-1 .rank-badge, .rank-2 .rank-badge, 
+        .rank-3 .rank-badge, .rank-4 .rank-badge, 
+        .rank-5 .rank-badge {
+            background: transparent; 
+            border: none;
+            font-size: 24px; /* Bigger Emojis */
+            box-shadow: none;
+        }
+        
         .prog-row { margin-bottom: 10px; }
         .prog-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; color: var(--text); }
         .prog-bar-bg { width: 100%; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
@@ -203,8 +171,8 @@
         <div class="controls-row">
             <select id="examType" onchange="loadResults()" style="flex:2;">
                 </select>
-            <button class="btn-mini" onclick="openLeaderboard()" style="color:#f1c40f;">🏆</button>
             <button class="btn-mini" onclick="openTestModal()">➕</button>
+            <button class="btn-mini" onclick="openLeaderboard()" style="color:#f1c40f;">🏆</button>
         </div>
 
         <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
@@ -408,7 +376,7 @@
             }
         }
 
-        // 4. 🏆 LEADERBOARD LOGIC (FIXED)
+         // 4. 🏆 LEADERBOARD LOGIC (Updated with Emojis)
         function openLeaderboard() {
             const selectedClass = document.getElementById("resClass").value;
             const exam = document.getElementById("examType").value;
@@ -435,10 +403,18 @@
             } else {
                 let html = "";
                 scoredStudents.forEach((s, index) => {
+                    // 🛑 EMOJI LOGIC HERE
+                    let rankDisplay = index + 1;
+                    if(index === 0) rankDisplay = "👑";
+                    else if(index === 1) rankDisplay = "💎";
+                    else if(index === 2) rankDisplay = "🎖️";
+                    else if(index === 3) rankDisplay = "🏅";
+                    else if(index === 4) rankDisplay = "⭐";
+
                     html += `
                     <div class="rank-item rank-${index+1}">
                         <div style="display:flex; align-items:center;">
-                            <div class="rank-badge">${index+1}</div> 
+                            <div class="rank-badge">${rankDisplay}</div> 
                             <div>
                                 <strong style="display:block;">${s.name}</strong>
                                 <small style="color:var(--placeholder)">Roll: ${s.roll}</small>
@@ -498,7 +474,7 @@
         }
     </script>
     
-    <script src="script.js?v=20002"></script>
+    <script src="script.js?v=30005"></script>
 
 </body>
 </html>
