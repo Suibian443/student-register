@@ -7,14 +7,13 @@
     const path = window.location.pathname;
 
     // 🛑 1. SECURITY REDIRECT
-    // If NOT logged in, kick them out of protected pages
     if (isLogged !== "true") {
         if (path.includes("attendance.html") || path.includes("results.html")) {
             window.location.href = "index.html";
         }
     }
 
-    // 🔄 2. UI RESTORATION (Wait for page to be ready)
+    // 🔄 2. UI RESTORATION
     window.addEventListener('load', () => {
         const navBar = document.querySelector('.bottom-nav');
         const pinOverlay = document.getElementById('pinOverlay');
@@ -27,38 +26,31 @@
                 navBar.style.setProperty('display', 'flex', 'important');
             }
 
-            // 2. Unlock the Main Page (if we are on it)
+            // 2. Unlock the Main Page
             if (pinOverlay && mainContent) {
                 pinOverlay.style.display = 'none';
                 mainContent.style.display = 'block';
                 
-                // Restore Admin Mode if needed
                 if (savedRole === 'admin') {
                     document.body.classList.add('admin-mode');
                 }
-                
-                // Load the student list
                 setTimeout(displayStudents, 100);
             }
 
-            // 3. Highlight the correct icon
             highlightActiveIcon(path);
         } 
         // CASE B: User is NOT LOGGED IN
         else {
-            // Ensure Bar is Hidden
             if (navBar) navBar.style.setProperty('display', 'none', 'important');
         }
     });
 })();
 
 // 🚨 SAFETY NET: GUARANTEE BAR VISIBILITY
-// This runs every 500ms to force the bar to appear if it accidentally hides
 setInterval(() => {
     const isLogged = sessionStorage.getItem("isLoggedIn");
     const navBar = document.querySelector('.bottom-nav');
     if (isLogged === "true" && navBar) {
-        // Only force it if it's currently hidden
         if (getComputedStyle(navBar).display === 'none') {
             navBar.style.setProperty('display', 'flex', 'important');
         }
@@ -72,17 +64,17 @@ function highlightActiveIcon(path) {
     const buttons = document.querySelectorAll('.nav-item');
     if (!buttons || buttons.length < 3) return;
 
-    buttons.forEach(btn => btn.classList.remove('active')); // Reset all
+    buttons.forEach(btn => btn.classList.remove('active'));
     
     if (path.includes("attendance.html")) buttons[1].classList.add('active');
     else if (path.includes("results.html")) buttons[2].classList.add('active');
-    else buttons[0].classList.add('active'); // Default to Student
+    else buttons[0].classList.add('active');
 }
 
 // =========================================================
 // 3. LOGIN & LOGOUT LOGIC
 // =========================================================
-let currentUserRole = 'guest'; // Default
+let currentUserRole = 'guest'; 
 let currentSort = 'roll';
 
 function checkPin(role) {
@@ -94,19 +86,15 @@ function checkPin(role) {
     if ((role === 'admin' && input === adminPin) || (role === 'guest' && input === guestPin)) {
         currentUserRole = role;
 
-        // 1. Save Session
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("userRole", role);
 
-        // 2. Unlock Interface
         document.getElementById('pinOverlay').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
 
-        // 3. Force Nav Bar (Immediate)
         const navBar = document.querySelector('.bottom-nav');
         if (navBar) navBar.style.setProperty('display', 'flex', 'important');
 
-        // 4. Set Mode
         if(role === 'admin') {
             document.body.classList.add('admin-mode');
         }
@@ -129,7 +117,6 @@ function logout() {
 function saveStudent() {
     // 1. Get Values
     let name = document.getElementById("name").value.trim();
-    // Capitalize Name
     name = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
     const roll = document.getElementById("roll").value.trim();
@@ -137,7 +124,7 @@ function saveStudent() {
     const guardian = document.getElementById("guardian").value;
     const phone = document.getElementById("phone").value;
     const notes = document.getElementById("notes").value;
-    const editIndex = document.getElementById("editIndex").value; // This stores the ID of who we are editing
+    const editIndex = document.getElementById("editIndex").value; 
 
     // 2. Validation
     if (!name || !roll || !studentClass) {
@@ -146,8 +133,8 @@ function saveStudent() {
 
     let students = JSON.parse(localStorage.getItem("students")) || [];
 
-    // 3. DUPLICATE CHECK (Fixed)
-    // We check if "Roll + Class" exists on ANY student EXCEPT the one we are currently editing
+    // 3. DUPLICATE CHECK
+    // Only checks for duplicates if we are NOT editing that specific student
     const isDuplicate = students.some((s, i) => 
         s.roll.toString() === roll.toString() && 
         s.studentClass.toString() === studentClass.toString() && 
@@ -158,7 +145,6 @@ function saveStudent() {
         return showToast(`⚠️ Error: Roll ${roll} already exists in Class ${studentClass}!`);
     }
 
-    // 4. Save Data
     const studentData = { name, roll, studentClass, guardian, phone, notes };
 
     if (editIndex === "") {
@@ -170,22 +156,19 @@ function saveStudent() {
         students[editIndex] = studentData;
         showToast("✅ Student Info Updated!");
         
-        // Close the form
         const details = document.getElementById("studentFormDetails");
         if(details) details.removeAttribute("open");
     }
 
     localStorage.setItem("students", JSON.stringify(students));
     
-    // 5. CRITICAL FIX: Reset the form so we exit "Edit Mode"
     displayStudents();
     resetForm(); 
 }
 
-
 function displayStudents() {
     const tbody = document.getElementById("studentList");
-    if(!tbody) return; // Guard clause
+    if(!tbody) return; 
 
     const searchInput = document.getElementById("search");
     const filterInput = document.getElementById("filterClass");
@@ -211,7 +194,6 @@ function displayStudents() {
 
     tbody.innerHTML = "";
     
-    // Check Role for buttons
     const role = sessionStorage.getItem("userRole") || 'guest';
 
     students.forEach((s) => {
@@ -263,6 +245,8 @@ function editStudent(roll, studentClass) {
     document.getElementById("notes").value = s.notes;
     
     document.getElementById("editIndex").value = index;
+    
+    // Change Button Text
     document.getElementById("submitBtn").innerText = "Update Info";
     
     const formDetails = document.getElementById("studentFormDetails");
@@ -285,24 +269,28 @@ function deleteStudent(roll, studentClass) {
 }
 
 function resetForm() {
-    // 1. Clear all text boxes
+    // 1. Clear text
     ["name", "roll", "guardian", "phone", "notes"].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.value = "";
     });
     
-    // 2. CRITICAL: Forget the ID of the student we were editing
+    // 2. Clear Edit ID
     document.getElementById("editIndex").value = "";
     
-    // 3. Change button text back to normal
+    // 3. Reset Button Text
     const btn = document.getElementById("submitBtn");
     if(btn) btn.innerText = "Add Student";
     
-    // 4. Close the details box (optional, keeps UI clean)
+    // 4. Close form
     const details = document.getElementById("studentFormDetails");
     if(details) details.removeAttribute("open");
 }
 
+function setSort(criteria) {
+    currentSort = criteria;
+    displayStudents();
+}
 
 // =========================================================
 // 5. UTILITIES (Toast, Stats, Theme)
@@ -324,117 +312,4 @@ function updateDashboard() {
     const dashboard = document.getElementById("statsDashboard");
     if (!dashboard) return;
 
-    let html = `<div class="stat-card"><span class="stat-label">Total</span><span class="stat-value">${students.length}</span></div>`;
-    Object.keys(counts).forEach(cls => { 
-        html += `<div class="stat-card"><span class="stat-label">Class ${cls}</span><span class="stat-value">${counts[cls]}</span></div>`; 
-    });
-    dashboard.innerHTML = html;
-}
-
-function toggleTheme() {
-    const current = document.body.getAttribute('data-theme') || "light";
-    const newTheme = current === 'dark' ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', newTheme);
-    localStorage.setItem("theme", newTheme); 
-    const btn = document.querySelector(".theme-toggle");
-    if(btn) btn.innerText = newTheme === "dark" ? "☀️" : "🌙";
-}
-
-// Auto-Load Theme
-(function loadSavedTheme() {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    document.body.setAttribute("data-theme", savedTheme);
-    const btn = document.querySelector(".theme-toggle");
-    if(btn) btn.innerText = savedTheme === "dark" ? "☀️" : "🌙";
-})();
-
-function clearAllData() {
-    if(confirm("DANGER: Delete ALL Data?")) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-// =========================================================
-// 6. EXPORT & BACKUP
-// =========================================================
-function exportToCSV() {
-    let students = JSON.parse(localStorage.getItem("students")) || [];
-    let attendanceData = JSON.parse(localStorage.getItem("attendance_records")) || {};
-    let resultsData = JSON.parse(localStorage.getItem("results_data")) || {};
-
-    const subjects = ['Math', 'English', 'Science'];
-    const standardExams = ['MidTerm', 'Final']; 
-
-    let header = "Name,Roll,Class,Guardian,Phone,Total Present,Total Absent,Notes";
-    subjects.forEach(sub => {
-        standardExams.forEach(ex => header += `,${sub} (${ex})`);
-    });
-    let csv = header + "\n";
-
-    students.forEach(s => {
-        // Attendance Count
-        let present = 0, absent = 0;
-        const uniqueId = `_${s.studentClass}_${s.roll}`;
-        Object.keys(attendanceData).forEach(key => {
-            if (key.includes(uniqueId)) {
-                if (attendanceData[key] === true) present++; else absent++;
-            }
-        });
-
-        // Base Info
-        let row = `"${s.name}","${s.roll}","${s.studentClass}","${s.guardian}","${s.phone}","${present}","${absent}","${s.notes}"`;
-
-        // Marks
-        subjects.forEach(sub => {
-            standardExams.forEach(ex => {
-                const key = `${ex}_${sub}_${s.studentClass}_${s.roll}`;
-                row += `,${resultsData[key] || "-"}`;
-            });
-        });
-
-        csv += row + "\n";
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'Master_Report.csv'; a.click();
-}
-
-function backupJSON() {
-    try {
-        const backupData = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            try { backupData[key] = JSON.parse(value); } 
-            catch (e) { backupData[key] = value; }
-        }
-        const dataStr = JSON.stringify(backupData, null, 2);
-        const blob = new Blob([dataStr], {type:'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; 
-        a.download = `Student_Register_Backup_${new Date().toISOString().slice(0,10)}.json`; 
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        showToast("✅ Backup Downloaded!");
-    } catch (err) { alert("Backup Failed: " + err.message); }
-}
-
-function restoreJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => { 
-        try {
-            const data = JSON.parse(e.target.result);
-            localStorage.clear();
-            Object.keys(data).forEach(key => {
-                if (typeof data[key] === 'object') localStorage.setItem(key, JSON.stringify(data[key]));
-                else localStorage.setItem(key, data[key]);
-            });
-            showToast("✅ System Restored!"); 
-            setTimeout(() => location.reload(), 1500);
-        } catch (err) { alert("Error: Invalid Backup File."); }
-    };
-    reader.readAsText(file);
-}
+    let html = `<div class="
