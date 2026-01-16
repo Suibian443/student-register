@@ -199,7 +199,12 @@
         <input type="text" id="guardian" placeholder="Guardian Name">
         <input type="tel" id="phone" placeholder="Phone">
         <input type="text" id="notes" placeholder="Notes">
-        <button id="submitBtn" onclick="saveStudent()">Save Student</button>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+    <button id="submitBtn" onclick="saveStudent()" style="flex:2;">Add Student</button>
+    
+    <button type="button" onclick="resetForm()" style="flex:1; background:#95a5a6; border:none; color:white; border-radius:5px; cursor:pointer;">Cancel</button>
+</div>
+
     </div>
 </details>
 
