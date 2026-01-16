@@ -400,7 +400,7 @@
             document.getElementById("leaderboardModal").style.display = "flex";
         }
 
-        // 5. PROGRESS LOGIC
+         // 5. PROGRESS LOGIC
         function openStudentProgress(roll, name) {
             document.getElementById("progTitle").innerText = name;
             const subject = document.getElementById("subject").value;
@@ -411,4 +411,42 @@
             let tests = JSON.parse(localStorage.getItem(keyPrefix)) || ["Mid-Term", "Final Exam"];
             
             const allResults = JSON.parse(localStorage.getItem("results_data")) || {};
-            
+            const progList = document.getElementById("progressList");
+
+            let html = "";
+            let hasData = false;
+
+            tests.forEach(test => {
+                const key = `${test}_${subject}_${selectedClass}_${roll}`;
+                const score = parseInt(allResults[key]);
+                
+                if(!isNaN(score)) {
+                    hasData = true;
+                    let color = "#e74c3c"; 
+                    if(score >= 80) color = "#27ae60"; 
+                    else if(score >= 33) color = "#f1c40f"; 
+                    
+                    html += `
+                    <div class="prog-row">
+                        <div class="prog-label">
+                            <span>${test}</span>
+                            <span>${score}%</span>
+                        </div>
+                        <div class="prog-bar-bg">
+                            <div class="prog-bar-fill" style="width:${score}%; background:${color};"></div>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            if(!hasData) html = "<p style='text-align:center; color:var(--placeholder)'>No exams taken yet.</p>";
+            progList.innerHTML = html;
+
+            document.getElementById("progressModal").style.display = "flex";
+        }
+    </script>
+    
+    <script src="script.js?v=888"></script>
+
+</body>
+</html>
