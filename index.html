@@ -28,6 +28,42 @@
             border-color: #9290C3 !important;
         }
         
+        /* DASHBOARD CARD STYLES */
+        .stat-card {
+            transition: transform 0.2s, opacity 0.3s;
+        }
+
+        /* 1. TOTAL CARD (Darker/Different) */
+        .stat-card.is-total {
+            background: linear-gradient(135deg, #2c3e50, #4ca1af) !important; /* Dark Slate Blue */
+            color: white !important;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* 2. ACTIVE CLASS (Highlighted) */
+        .stat-card.is-active {
+            background: var(--primary) !important; /* Your Theme Purple */
+            color: white !important;
+            transform: scale(1.05); /* Slight pop */
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4);
+            z-index: 2;
+            border: 2px solid white;
+        }
+
+        /* 3. ZERO COUNT (Muted) */
+        .stat-card.is-zero {
+            opacity: 0.5; /* Faded */
+            background: var(--card); /* Standard Card Color */
+            border: 1px solid var(--border);
+        }
+        
+        /* 4. DEFAULT (Non-zero, non-active) */
+        .stat-card {
+            background: var(--card);
+            color: var(--text);
+        }
+
+
         /* Floating Bar Styles */
         body { padding-bottom: 70px !important; }
         .bottom-nav {
