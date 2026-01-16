@@ -123,6 +123,50 @@
         [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
         [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
         .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
+
+    /* 🎨 DASHBOARD COLORS & LAYOUT (Add this to index.html) */
+    
+    /* 1. Force 3 Columns for the Arch Layout */
+    #statsDashboard {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important; /* 3 cards per row */
+        gap: 10px !important;
+        padding: 10px !important;
+    }
+
+    /* 2. Card Base Style */
+    .stat-card {
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        color: white !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .stat-card:active { transform: scale(0.95); }
+
+    /* 3. The "Total" Card (Blue/Dark) */
+    .is-total {
+        background: linear-gradient(135deg, #2c3e50, #4ca1af) !important;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* 4. Active/Selected Class (Bright Purple) */
+    .is-active {
+        background: #9b59b6 !important; /* Purple */
+        border: 2px solid white;
+        transform: scale(1.05);
+        z-index: 10;
+    }
+
+    /* 5. Regular/Empty Classes (Faded Purple) */
+    .is-normal { background: #95a5a6 !important; } /* Grey for 0 */
+    .is-filled { background: #9b59b6 !important; opacity: 0.8; } /* Purple for students */
+
     </style>
 </head>
 <body>
