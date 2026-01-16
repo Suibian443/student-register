@@ -156,6 +156,62 @@
         [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
         [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
         .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
+
+    /* ⬆️⬇️ FLOATING SCROLL BUTTONS (Small, Black, Auto-Hide) */
+    .scroll-controls {
+        position: fixed;
+        bottom: 80px; 
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 999;
+        
+        /* 🛑 HIDDEN BY DEFAULT */
+        opacity: 0;
+        pointer-events: none; /* Not clickable when hidden */
+        transition: opacity 0.3s ease;
+    }
+
+    /* Class to show buttons */
+    .scroll-controls.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .scroll-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        
+        /* 🛑 BLACK BACKGROUND */
+        background-color: #000000; 
+        color: white;
+        
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s;
+        backdrop-filter: blur(2px);
+    }
+    .scroll-btn:active { transform: scale(0.9); background-color: #333; }
+    
+    /* Dark Mode: Keep Black but add stronger border */
+    [data-theme="dark"] .scroll-btn { background-color: #000; border-color: #444; }
+
+    /* 🏹 SMALLER ARROWS */
+    .arrow {
+        border: solid white;
+        border-width: 0 2px 2px 0; /* Thinner lines */
+        display: inline-block;
+        padding: 3px; /* Smaller arrow size */
+    }
+    .up { transform: rotate(-135deg); margin-top: 2px; }
+    .down { transform: rotate(45deg); margin-bottom: 1px; }
+
     </style>
 </head>
 <body>
@@ -269,8 +325,21 @@
         <span class="nav-icon">📊</span>
     </button>
 </div>
+<script>
+    // 🛑 SCROLL VISIBILITY LOGIC
+    window.addEventListener('scroll', function() {
+        const controls = document.querySelector('.scroll-controls');
+        // Show button if scrolled more than 100px
+        if (window.scrollY > 100) {
+            controls.classList.add('show');
+        } else {
+            controls.classList.remove('show');
+        }
+    });
 
-<script src="script.js?v=9572"></script>
+</script>
+
+<script src="script.js?v=95872"></script>
 
 </body>
 </html>
