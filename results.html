@@ -10,7 +10,7 @@
 
     <style>
         /* Base Styles */
-        body { padding-bottom: 70px !important; } /* Space for bar */
+        body { padding-bottom: 70px !important; }
         .controls-row { display: flex; gap: 10px; margin-bottom: 15px; }
         select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); width: 100%; }
 
@@ -31,7 +31,6 @@
         }
         .student-info h4 { margin: 0; font-size: 16px; color: var(--text); }
         .student-info p { margin: 5px 0 0; font-size: 13px; color: var(--placeholder); }
-
         .card-actions { display: flex; align-items: center; gap: 10px; }
         
         .score-input {
@@ -40,13 +39,12 @@
             background: var(--bg); color: var(--text); transition: 0.2s;
         }
         .score-input:focus { border-color: var(--primary); background: var(--card); outline: none; }
-        
         .progress-btn {
             background: transparent; border: 1px solid var(--border); 
             border-radius: 8px; cursor: pointer; padding: 8px; font-size: 16px;
         }
 
-        /* Pass/Fail Colors */
+        /* Status Colors */
         .passing { border-color: #27ae60 !important; color: #27ae60; background: #ecfdf5; }
         .failing { border-color: #e74c3c !important; color: #e74c3c; background: #fef2f2; }
         [data-theme="dark"] .passing { background: #064e3b; color: #6ee7b7; }
@@ -69,100 +67,52 @@
         }
         @keyframes popUp { from {transform: scale(0.8); opacity:0;} to {transform: scale(1); opacity:1;} }
 
-        /* LEADERBOARD STYLES */
-        .rank-item {
-            display: flex; justify-content: space-between; padding: 10px;
-            border-bottom: 1px solid var(--border); align-items: center;
-        }
-        .rank-badge {
-            width: 25px; height: 25px; border-radius: 50%; background: var(--bg);
-            color: var(--text); display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 12px; margin-right: 10px;
-        }
-        .rank-1 .rank-badge { background: #FFD700; color: #000; } /* Gold */
-        .rank-2 .rank-badge { background: #C0C0C0; color: #000; } /* Silver */
-        .rank-3 .rank-badge { background: #CD7F32; color: #000; } /* Bronze */
-
-        /* PROGRESS BAR STYLES */
+        /* LEADERBOARD & PROGRESS */
+        .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); align-items: center; }
+        .rank-badge { width: 25px; height: 25px; border-radius: 50%; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-right: 10px; }
+        .rank-1 .rank-badge { background: #FFD700; color: #000; }
+        .rank-2 .rank-badge { background: #C0C0C0; color: #000; }
+        .rank-3 .rank-badge { background: #CD7F32; color: #000; }
+        
         .prog-row { margin-bottom: 10px; }
         .prog-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; color: var(--text); }
         .prog-bar-bg { width: 100%; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
         .prog-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease; }
-        
         .btn-close { width:100%; padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-weight:bold; margin-top:15px; }
     
-        /* 🛑 WIDER CAPSULE NAV (High Contrast) 🛑 */
-        /* 2. The Floating Bar */
+        /* Floating Bar Styles */
+        body { padding-bottom: 70px !important; }
         .bottom-nav {
-            position: fixed !important;
-            bottom: 15px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            
-            width: 75% !important;       /* 🛑 WIDER */
-            max-width: 350px !important; 
-            height: 48px !important;
-            
-            background-color: #ffffff !important; 
-            
-            display: none !important; /* Hidden by default until JS loads */
-            justify-content: space-evenly !important;
-            align-items: center !important;
-            
-            border-radius: 30px !important;
-            
-            /* High Contrast for Light Theme */
-            border: 1px solid #c0c0c0 !important;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.25) !important;
-            
-            z-index: 9999 !important;
+            position: fixed !important; bottom: 15px !important; left: 50% !important;
+            transform: translateX(-50%) !important; width: 75% !important;
+            max-width: 350px !important; height: 48px !important;
+            background-color: #ffffff !important; display: none !important;
+            justify-content: space-evenly !important; align-items: center !important;
+            border-radius: 30px !important; border: 1px solid #c0c0c0 !important;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25) !important; z-index: 9999 !important;
         }
-
-        /* DARK MODE BAR */
         [data-theme="dark"] .bottom-nav {
-            background-color: #2c2c2c !important; 
-            border: 1px solid #444 !important;
+            background-color: #2c2c2c !important; border: 1px solid #444 !important;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
         }
-
-        /* The Buttons */
         .nav-item {
-            background: transparent !important;
-            border: none !important;
-            color: #999 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-size: 9px !important;
-            width: auto !important;
-            height: 100% !important;
-            padding: 0 5px !important;
-            margin: 0 !important;
-            cursor: pointer !important;
+            background: transparent !important; border: none !important;
+            color: #999 !important; display: flex !important; flex-direction: column !important;
+            align-items: center !important; justify-content: center !important;
+            font-size: 9px !important; width: auto !important; height: 100% !important;
+            padding: 0 5px !important; margin: 0 !important; cursor: pointer !important;
             position: relative !important;
         }
-
         .nav-icon {
-            font-size: 20px !important;
-            margin-bottom: 2px !important;
-            display: block !important;
-            transition: transform 0.2s !important;
+            font-size: 20px !important; margin-bottom: 2px !important;
+            display: block !important; transition: transform 0.2s !important;
         }
-
-        /* ACTIVE STATE */
         .nav-item.active { color: #9b59b6 !important; font-weight: bold !important; }
-        
         .nav-item.active::after {
-            content: '' !important;
-            position: absolute !important;
-            bottom: 5px !important;
-            width: 36px !important;
-            height: 3px !important;
-            background-color: #9b59b6 !important;
+            content: '' !important; position: absolute !important; bottom: 5px !important;
+            width: 36px !important; height: 3px !important; background-color: #9b59b6 !important;
             border-radius: 10px !important;
         }
-
         [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
         [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
         .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
@@ -247,17 +197,12 @@
     <div class="bottom-nav">
         <button onclick="window.location.href='index.html'" class="nav-item">
             <span class="nav-icon">👨‍🎓</span>
-            
         </button>
-        
         <button onclick="window.location.href='attendance.html'" class="nav-item">
             <span class="nav-icon">📅</span>
-            
         </button>
-        
         <button onclick="window.location.href='results.html'" class="nav-item active">
             <span class="nav-icon">📊</span>
-            
         </button>
     </div>
 
@@ -267,7 +212,6 @@
             const savedTheme = localStorage.getItem("theme") || "light";
             document.body.setAttribute("data-theme", savedTheme);
             document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
-            
             loadExamTypes(); 
             loadResults();
         };
@@ -385,7 +329,6 @@
                     </div>
                     <div class="card-actions">
                         <button class="progress-btn" onclick="openStudentProgress('${s.roll}', '${s.name}')">📈</button>
-                        
                         <input type="tel" class="score-input ${colorClass}" 
                             id="input_${key}" value="${savedScore}" 
                             placeholder="--" maxlength="3"
@@ -415,7 +358,7 @@
             }
         }
 
-        // 4. 🏆 LEADERBOARD LOGIC
+        // 4. LEADERBOARD LOGIC
         function openLeaderboard() {
             const selectedClass = document.getElementById("resClass").value;
             const exam = document.getElementById("examType").value;
@@ -423,24 +366,18 @@
             const students = JSON.parse(localStorage.getItem("students")) || [];
             const allResults = JSON.parse(localStorage.getItem("results_data")) || {};
 
-            // 1. Get students in this class
             const classStudents = students.filter(s => s.studentClass === selectedClass);
             
-            // 2. Map scores
             let scoredStudents = classStudents.map(s => {
                 const key = `${exam}_${subject}_${s.studentClass}_${s.roll}`;
                 const score = parseInt(allResults[key]) || 0;
                 return { name: s.name, score: score, roll: s.roll };
             });
 
-            // 3. Filter out those with 0 score and Sort
             scoredStudents = scoredStudents.filter(s => s.score > 0);
             scoredStudents.sort((a, b) => b.score - a.score);
 
-            // 4. Take Top 5
             const top5 = scoredStudents.slice(0, 5);
-
-            // 5. Build HTML
             const lbList = document.getElementById("leaderboardList");
             document.getElementById("lbSubtitle").innerText = `${exam} - ${subject} (Class ${selectedClass})`;
             
@@ -463,7 +400,7 @@
             document.getElementById("leaderboardModal").style.display = "flex";
         }
 
-        // 5. 📈 PROGRESS LOGIC (Restored from backup)
+        // 5. PROGRESS LOGIC
         function openStudentProgress(roll, name) {
             document.getElementById("progTitle").innerText = name;
             const subject = document.getElementById("subject").value;
@@ -474,43 +411,4 @@
             let tests = JSON.parse(localStorage.getItem(keyPrefix)) || ["Mid-Term", "Final Exam"];
             
             const allResults = JSON.parse(localStorage.getItem("results_data")) || {};
-            const progList = document.getElementById("progressList");
-
-            let html = "";
-            let hasData = false;
-
-            tests.forEach(test => {
-                const key = `${test}_${subject}_${selectedClass}_${roll}`;
-                const score = parseInt(allResults[key]);
-                
-                if(!isNaN(score)) {
-                    hasData = true;
-                    // Calculate Color
-                    let color = "#e74c3c"; // Red
-                    if(score >= 80) color = "#27ae60"; // Green
-                    else if(score >= 33) color = "#f1c40f"; // Yellow
-                    
-                    html += `
-                    <div class="prog-row">
-                        <div class="prog-label">
-                            <span>${test}</span>
-                            <span>${score}%</span>
-                        </div>
-                        <div class="prog-bar-bg">
-                            <div class="prog-bar-fill" style="width:${score}%; background:${color};"></div>
-                        </div>
-                    </div>`;
-                }
-            });
-
-            if(!hasData) html = "<p style='text-align:center; color:var(--placeholder)'>No exams taken yet.</p>";
-            progList.innerHTML = html;
-
-            document.getElementById("progressModal").style.display = "flex";
-        }
-    </script>
-    
-    <script src="script.js"></script>
-
-</body>
-</html>
+            
