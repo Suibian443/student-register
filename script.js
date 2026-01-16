@@ -285,19 +285,24 @@ function deleteStudent(roll, studentClass) {
 }
 
 function resetForm() {
-    // Clear all text inputs
+    // 1. Clear all text boxes
     ["name", "roll", "guardian", "phone", "notes"].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.value = "";
     });
     
-    // CRITICAL: Clear the hidden ID so the next save creates a NEW student
+    // 2. CRITICAL: Forget the ID of the student we were editing
     document.getElementById("editIndex").value = "";
     
-    // Reset Button Text back to normal
+    // 3. Change button text back to normal
     const btn = document.getElementById("submitBtn");
     if(btn) btn.innerText = "Add Student";
+    
+    // 4. Close the details box (optional, keeps UI clean)
+    const details = document.getElementById("studentFormDetails");
+    if(details) details.removeAttribute("open");
 }
+
 
 // =========================================================
 // 5. UTILITIES (Toast, Stats, Theme)
