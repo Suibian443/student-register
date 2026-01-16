@@ -313,16 +313,59 @@ function showToast(message) {
 function updateDashboard() {
     const students = JSON.parse(localStorage.getItem("students")) || [];
     const counts = { "6": 0, "7": 0, "8": 0, "9": 0, "10": 0 };
-    students.forEach(s => { if(counts[s.studentClass] !== undefined) counts[s.studentClass]++; });
+    
+    // Count students per class
+    students.forEach(s => { 
+        if(counts[s.studentClass] !== undefined) counts[s.studentClass]++; 
+    });
     
     const dashboard = document.getElementById("statsDashboard");
     if (!dashboard) return;
+    
+    const currentFilter = document.getElementById("filterClass").value;
 
-    let html = `<div class="stat-card"><span class="stat-label">Total</span><span class="stat-value">${students.length}</span></div>`;
-    Object.keys(counts).forEach(cls => { 
-        html += `<div class="stat-card"><span class="stat-label">Class ${cls}</span><span class="stat-value">${counts[cls]}</span></div>`; 
+    // 🛑 DEFINE YOUR EXACT ORDER HERE:
+    // Row 1: 7, 8, 9
+    // Row 2: 6, Total, 10
+    const cardOrder = ["7", "8", "9", "6", "Total", "10"];
+
+    let html = "";
+
+    cardOrder.forEach(key => {
+        // CASE A: The "Total" Card (Special Style)
+        if (key === "Total") {
+            html += `
+            <div class="stat-card is-total">
+                <span class="stat-label">Total</span>
+                <span class="stat-value">${students.length}</span>
+            </div>`;
+        } 
+        // CASE B: The Class Cards
+        else {
+            const count = counts[key];
+            let classes = "stat-card";
+            
+            // Apply Styles
+            if (key === currentFilter) classes += " is-active"; // Purple if active
+            else if (count === 0) classes += " is-zero";        // Faded if empty
+            
+            html += `
+            <div class="${classes}" onclick="filterByCard('${key}')" style="cursor:pointer">
+                <span class="stat-label">Class ${key}</span>
+                <span class="stat-value">${count}</span>
+            </div>`;
+        }
     });
+
     dashboard.innerHTML = html;
+}
+
+// Helper function (Keep this if you haven't added it yet)
+function filterByCard(cls) {
+    const filter = document.getElementById("filterClass");
+    filter.value = cls;
+    displayStudents(); 
+    updateDashboard(); 
 }
 
 function toggleTheme() {
