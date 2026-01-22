@@ -65,7 +65,7 @@
         [data-theme="dark"] .btn-u { background: #333; color: #aaa; }
 
 
- /* 💾 SAVE BAR (Fixed Bottom) */
+         /* 💾 SAVE BAR (Fixed Bottom) */
         #saveBar {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
             width: 90%; max-width: 400px;
@@ -80,7 +80,6 @@
             background: #27ae60; color: white; border: none; 
             padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
         }
-
 
 
         /* MODAL & CALENDAR STYLES (For History) */
@@ -194,12 +193,6 @@
         <div style="height: 60px;"></div>
     </div>
 
-
-    <div id="saveBar">
-        <span>⚠️ Unsaved Changes</span>
-        <button class="btn-save-confirm" onclick="saveAttendance()">Save Now</button>
-    </div>
-
     <div id="historyModal" class="modal">
         <div class="modal-content">
             <h3 id="histName" style="margin:0; color:var(--text);">Student Name</h3>
@@ -230,7 +223,18 @@
         </button>
     </div>
 
+    <div id="saveBar">
+        <span>⚠️ Unsaved Changes</span>
+        <button class="btn-save-confirm" onclick="saveAttendance()">Save Now</button>
+    </div>
+
+
+
     <script>
+        // GLOBAL VARIABLES TO HOLD UNSAVED DATA
+        let tempData = {}; 
+        let hasUnsavedChanges = false;
+
         window.onload = function() {
             const savedTheme = localStorage.getItem("theme") || "light";
             document.body.setAttribute("data-theme", savedTheme);
@@ -249,33 +253,42 @@
             document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
         }
 
-        // 1. LOAD DAILY LIST & BUTTONS
+        // 1. LOAD DATA (INTO TEMP OBJECT)
         function loadDailyView() {
+            // Warn if switching with unsaved changes
+            if(hasUnsavedChanges) {
+                if(!confirm("You have unsaved changes! Discard them?")) {
+                    return; // Abort switch
+                }
+            }
+
+            hasUnsavedChanges = false;
+            document.getElementById("saveBar").classList.remove("show");
+
             const cls = document.getElementById("attClass").value;
-            const fullDate = document.getElementById("attDate").value; // "YYYY-MM-DD"
-            
+            const fullDate = document.getElementById("attDate").value; 
             if(!fullDate) return;
 
             const [year, month, day] = fullDate.split('-');
-            const monthStr = `${year}-${month}`; // Key for storage: YYYY-MM
+            const monthStr = `${year}-${month}`; 
             const dayNum = parseInt(day);
 
-            // Get Data
+            // Fetch from storage
             const students = JSON.parse(localStorage.getItem("students")) || [];
-            const attData = JSON.parse(localStorage.getItem(`att_${cls}_${monthStr}`)) || {};
-            const holidays = JSON.parse(localStorage.getItem(`holidays_${monthStr}`)) || [];
+            // Clone data to modify in memory
+            const storedData = JSON.parse(localStorage.getItem(`att_${cls}_${monthStr}`)) || {};
+            tempData = storedData; 
 
+            const holidays = JSON.parse(localStorage.getItem(`holidays_${monthStr}`)) || [];
             const isHoliday = holidays.includes(dayNum);
 
-            // Filter Class
             const filtered = students.filter(s => s.studentClass === cls);
             filtered.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
 
             const list = document.getElementById("attList");
             list.innerHTML = "";
 
-            let countP = 0;
-            let countA = 0;
+            let countP = 0, countA = 0;
 
             if(filtered.length === 0) {
                 list.innerHTML = "<div style='text-align:center; padding:20px; color:var(--placeholder)'>No students found.</div>";
@@ -283,17 +296,14 @@
             }
 
             filtered.forEach(s => {
-                // Get Status for this specific day
-                const studentRecord = attData[s.roll] || {};
-                const status = studentRecord[dayNum]; // 'P', 'A', or undefined
+                const studentRecord = tempData[s.roll] || {};
+                const status = studentRecord[dayNum]; 
 
-                // Calculate Totals
                 if(!isHoliday) {
                     if(status === 'P') countP++;
                     if(status === 'A') countA++;
                 }
 
-                // Determine Button Appearance
                 let btnClass = "btn-u";
                 let btnText = "Mark";
                 
@@ -314,53 +324,87 @@
                         <h4>${s.name}</h4>
                         <p>Roll: ${s.roll}</p>
                     </div>
-                    <button class="att-btn ${btnClass}" onclick="toggleAttendance('${s.roll}', ${isHoliday})">
+                    <button class="att-btn ${btnClass}" onclick="toggleAttendance('${s.roll}', ${isHoliday}, this)">
                         ${btnText}
                     </button>
                 </div>`;
             });
 
-            // Update Header Counts
             document.getElementById("sumP").innerText = countP;
             document.getElementById("sumA").innerText = countA;
         }
 
-        // 2. TOGGLE ATTENDANCE LOGIC
-        function toggleAttendance(roll, isHoliday) {
+        // 2. TOGGLE ATTENDANCE (UPDATES TEMP DATA ONLY)
+        function toggleAttendance(roll, isHoliday, btnElement) {
             if(isHoliday) {
-                alert("Cannot mark attendance on a Holiday! Unmark the holiday first.");
+                alert("Cannot mark attendance on a Holiday!");
                 return;
             }
 
-            const cls = document.getElementById("attClass").value;
-            const fullDate = document.getElementById("attDate").value; 
-            const [year, month, day] = fullDate.split('-');
-            const monthStr = `${year}-${month}`;
-            const dayNum = parseInt(day);
+            // Mark as unsaved
+            hasUnsavedChanges = true;
+            document.getElementById("saveBar").classList.add("show");
 
-            const storageKey = `att_${cls}_${monthStr}`;
-            let data = JSON.parse(localStorage.getItem(storageKey)) || {};
-            let studentData = data[roll] || {};
+            const fullDate = document.getElementById("attDate").value; 
+            const dayNum = parseInt(fullDate.split('-')[2]);
+
+            // Init student record in temp data if missing
+            if(!tempData[roll]) tempData[roll] = {};
+
+            const current = tempData[roll][dayNum];
+            let nextStatus = null;
+            let nextClass = "";
+            let nextText = "";
 
             // Cycle: Null -> P -> A -> Null
-            const current = studentData[dayNum];
-            let nextStatus = null;
+            if (!current) { 
+                nextStatus = 'P'; nextClass = 'btn-p'; nextText = 'Present'; 
+            } else if (current === 'P') { 
+                nextStatus = 'A'; nextClass = 'btn-a'; nextText = 'Absent'; 
+            } else if (current === 'A') { 
+                nextStatus = null; nextClass = 'btn-u'; nextText = 'Mark'; 
+            }
 
-            if (!current) nextStatus = 'P';
-            else if (current === 'P') nextStatus = 'A';
-            else if (current === 'A') nextStatus = null; // Back to unmarked
+            // Update Temp Data
+            if (nextStatus) tempData[roll][dayNum] = nextStatus;
+            else delete tempData[roll][dayNum];
 
-            if (nextStatus) studentData[dayNum] = nextStatus;
-            else delete studentData[dayNum];
+            // Visual Update (Instant)
+            btnElement.className = `att-btn ${nextClass}`;
+            btnElement.innerText = nextText;
 
-            data[roll] = studentData;
-            localStorage.setItem(storageKey, JSON.stringify(data));
-
-            // Reload UI to show changes
-            loadDailyView();
+            // Recalculate Sums
+            recalcSums(dayNum);
         }
 
-        // 3. SHOW HISTORY MODAL (Read-Only View)
+        function recalcSums(dayNum) {
+            let p = 0, a = 0;
+            Object.values(tempData).forEach(record => {
+                if(record[dayNum] === 'P') p++;
+                if(record[dayNum] === 'A') a++;
+            });
+            document.getElementById("sumP").innerText = p;
+            document.getElementById("sumA").innerText = a;
+        }
+
+        // 3. SAVE FUNCTION (COMMITS TO STORAGE)
+        function saveAttendance() {
+            const cls = document.getElementById("attClass").value;
+            const fullDate = document.getElementById("attDate").value;
+            const monthStr = fullDate.substring(0, 7); // YYYY-MM
+
+            localStorage.setItem(`att_${cls}_${monthStr}`, JSON.stringify(tempData));
+            
+            hasUnsavedChanges = false;
+            document.getElementById("saveBar").classList.remove("show");
+            
+            const btn = document.querySelector(".btn-save-confirm");
+            const originalText = btn.innerText;
+            btn.innerText = "Saved!";
+            setTimeout(() => btn.innerText = originalText, 2000);
+        }
+
+        // 4. HISTORY & HOLIDAYS
         function openHistoryModal(roll, name) {
             const fullDate = document.getElementById("attDate").value;
             const [year, month] = fullDate.split('-');
@@ -368,9 +412,7 @@
             const daysInMonth = new Date(year, month, 0).getDate();
 
             document.getElementById("histName").innerText = name;
-            
-            const cls = document.getElementById("attClass").value;
-            const attData = JSON.parse(localStorage.getItem(`att_${cls}_${monthStr}`)) || {};
+            const attData = tempData; // Use working data
             const holidays = JSON.parse(localStorage.getItem(`holidays_${monthStr}`)) || [];
             const studentRecord = attData[roll] || {};
 
@@ -381,27 +423,21 @@
                 const dayDiv = document.createElement("div");
                 dayDiv.className = "cal-day";
                 dayDiv.innerText = i;
-
                 if(holidays.includes(i)) dayDiv.classList.add("is-holiday");
                 else if(studentRecord[i] === 'P') dayDiv.classList.add("is-present");
                 else if(studentRecord[i] === 'A') dayDiv.classList.add("is-absent");
-
                 grid.appendChild(dayDiv);
             }
-
             document.getElementById("historyModal").style.display = "flex";
         }
 
-        // 4. HOLIDAY MANAGER
         function openGlobalHolidayModal() {
             const fullDate = document.getElementById("attDate").value;
             const [year, month] = fullDate.split('-');
             const monthStr = `${year}-${month}`;
             const daysInMonth = new Date(year, month, 0).getDate();
-            
             const grid = document.getElementById("holidayGrid");
             grid.innerHTML = "";
-
             const holidayKey = `holidays_${monthStr}`;
             let holidays = JSON.parse(localStorage.getItem(holidayKey)) || [];
 
@@ -425,10 +461,10 @@
             }
             document.getElementById("holidayModal").style.display = "flex";
         }
-
     </script>
+
     
-    <script src="script.js?v=attendance_daily_final1"></script>
+    <script src="script.js?v=attendance_daily_final11"></script>
 
 </body>
 </html>
