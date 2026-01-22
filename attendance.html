@@ -65,21 +65,42 @@
         [data-theme="dark"] .btn-u { background: #333; color: #aaa; }
 
 
-         /* 💾 SAVE BAR (Fixed Bottom) */
-        #saveBar {
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
-            width: 90%; max-width: 400px;
-            background: #2c3e50; padding: 10px 20px; border-radius: 50px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 2000;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #saveBar.show { transform: translateX(-50%) translateY(0); }
-        #saveBar span { color: white; font-weight: bold; font-size: 14px; }
-        .btn-save-confirm {
-            background: #27ae60; color: white; border: none; 
-            padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
-        }
+         /* 💾 SAVE BAR (Fixed Higher & On Top) */
+    #saveBar {
+        position: fixed; 
+        bottom: 100px; /* 🛑 Raised higher to clear the Nav Bar */
+        left: 50%; 
+        transform: translateX(-50%) translateY(150px); /* Start hidden below */
+        width: 90%; max-width: 380px;
+        background: #222; /* Dark background */
+        padding: 12px 20px; 
+        border-radius: 50px;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+        z-index: 10000; /* 🛑 Super high Z-Index to stay on top */
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid #444;
+    }
+    
+    #saveBar.show { transform: translateX(-50%) translateY(0); } /* Slide up */
+    
+    #saveBar span { color: #f1c40f; font-weight: bold; font-size: 13px; display:flex; align-items:center; gap:5px;}
+    
+    .save-actions { display: flex; gap: 10px; }
+
+    .btn-discard {
+        background: #444; color: white; border: none;
+        padding: 8px 12px; border-radius: 20px; font-weight: bold; cursor: pointer;
+        font-size: 12px;
+    }
+    
+    .btn-save-confirm {
+        background: #27ae60; color: white; border: none; 
+        padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
+        font-size: 12px;
+        box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);
+    }
+
 
 
         /* MODAL & CALENDAR STYLES (For History) */
@@ -224,10 +245,12 @@
     </div>
 
     <div id="saveBar">
-        <span>⚠️ Unsaved Changes</span>
-        <button class="btn-save-confirm" onclick="saveAttendance()">Save Now</button>
+        <span>⚠️ Unsaved</span>
+        <div class="save-actions">
+            <button class="btn-discard" onclick="discardChanges()">Cancel</button>
+            <button class="btn-save-confirm" onclick="saveAttendance()">Save</button>
+        </div>
     </div>
-
 
 
     <script>
@@ -404,6 +427,17 @@
             setTimeout(() => btn.innerText = originalText, 2000);
         }
 
+    // 🛑 NEW: DISCARD CHANGES (Undo accidental clicks)
+    function discardChanges() {
+        hasUnsavedChanges = false;
+        document.getElementById("saveBar").classList.remove("show");
+        // Reload data to wipe temporary changes
+        loadDailyView(); 
+    }
+
+
+
+
         // 4. HISTORY & HOLIDAYS
         function openHistoryModal(roll, name) {
             const fullDate = document.getElementById("attDate").value;
@@ -464,7 +498,7 @@
     </script>
 
     
-    <script src="script.js?v=attendance_daily_final11"></script>
+    <script src="script.js?v=attendance_daily_final111"></script>
 
 </body>
 </html>
