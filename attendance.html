@@ -98,11 +98,12 @@
         }
         
         /* Floating Bar Styles */
+        body { padding-bottom: 70px !important; }
         .bottom-nav {
             position: fixed !important; bottom: 15px !important; left: 50% !important;
             transform: translateX(-50%) !important; width: 75% !important;
             max-width: 350px !important; height: 48px !important;
-            background-color: #ffffff !important; display: flex !important;
+            background-color: #ffffff !important; display: none !important;
             justify-content: space-evenly !important; align-items: center !important;
             border-radius: 30px !important; border: 1px solid #c0c0c0 !important;
             box-shadow: 0 12px 35px rgba(0,0,0,0.25) !important; z-index: 9999 !important;
@@ -115,13 +116,23 @@
             background: transparent !important; border: none !important;
             color: #999 !important; display: flex !important; flex-direction: column !important;
             align-items: center !important; justify-content: center !important;
-            font-size: 9px !important; padding: 0 5px !important; cursor: pointer !important;
+            font-size: 9px !important; width: auto !important; height: 100% !important;
+            padding: 0 5px !important; margin: 0 !important; cursor: pointer !important;
+            position: relative !important;
         }
-        .nav-icon { font-size: 20px !important; margin-bottom: 2px !important; display: block !important; }
+        .nav-icon {
+            font-size: 20px !important; margin-bottom: 2px !important;
+            display: block !important; transition: transform 0.2s !important;
+        }
         .nav-item.active { color: #9b59b6 !important; font-weight: bold !important; }
-        .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
+        .nav-item.active::after {
+            content: '' !important; position: absolute !important; bottom: 5px !important;
+            width: 36px !important; height: 3px !important; background-color: #9b59b6 !important;
+            border-radius: 10px !important;
+        }
         [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
-
+        [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
+        .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
     </style>
 </head>
 <body>
