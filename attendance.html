@@ -11,24 +11,60 @@
     <style>
         /* Base Styles */
         body { padding-bottom: 70px !important; }
-        .controls-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .controls-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         
-        select, input[type="month"] { 
+        select, input[type="date"] { 
             flex: 1; padding: 12px; border-radius: 8px; 
             border: 1px solid var(--border); background: var(--card); 
-            color: var(--text); width: 100%; font-size: 14px;
+            color: var(--text); font-size: 14px;
         }
 
-        /* Student List Styles */
-        .student-item {
+        /* 📊 DAILY SUMMARY CARDS */
+        .daily-summary {
+            display: flex; gap: 10px; margin-bottom: 20px;
+        }
+        .d-card {
+            flex: 1; padding: 15px; border-radius: 12px;
+            color: white; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .d-card h4 { margin: 0; font-size: 12px; opacity: 0.9; text-transform: uppercase; }
+        .d-card span { font-size: 28px; font-weight: 800; line-height: 1.2; }
+        
+        .bg-present { background-color: #27ae60; }
+        .bg-absent { background-color: #c0392b; }
+
+        /* 📋 STUDENT LIST ITEM (Row) */
+        .student-row {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--card); padding: 15px; margin-bottom: 10px;
+            background: var(--card); padding: 12px 15px; margin-bottom: 10px;
             border-radius: 12px; border: 1px solid var(--border);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .student-item:active { transform: scale(0.98); }
+        
+        .stu-info { flex: 1; cursor: pointer; } /* Clicking name opens history */
+        .stu-info h4 { margin: 0; color: var(--text); font-size: 15px; }
+        .stu-info p { margin: 2px 0 0; color: var(--placeholder); font-size: 12px; }
 
-        /* MODAL & CALENDAR STYLES */
+        /* 🔘 ATTENDANCE TOGGLE BUTTON */
+        .att-btn {
+            width: 100px; padding: 10px 0; border-radius: 8px;
+            font-weight: bold; font-size: 13px; text-transform: uppercase;
+            border: none; cursor: pointer; transition: 0.2s;
+            text-align: center;
+        }
+        .btn-p { background: #e8f8f5; color: #27ae60; border: 1px solid #27ae60; }
+        .btn-a { background: #fdedec; color: #c0392b; border: 1px solid #c0392b; }
+        .btn-u { background: var(--bg); color: var(--placeholder); border: 1px solid var(--border); }
+        .btn-h { background: #fef5e7; color: #f39c12; border: 1px solid #f39c12; pointer-events: none; } /* Holiday */
+
+        /* Dark Mode Adjustments */
+        [data-theme="dark"] .btn-p { background: #0e6655; color: white; border: none; }
+        [data-theme="dark"] .btn-a { background: #78281f; color: white; border: none; }
+        [data-theme="dark"] .btn-u { background: #333; color: #aaa; }
+
+        /* MODAL & CALENDAR STYLES (For History) */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000;
@@ -41,40 +77,19 @@
             max-height: 90vh; overflow-y: auto;
         }
 
-        /* Summary Boxes */
-        .summary-row { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-        .summary-box {
-            flex: 1; padding: 10px; border-radius: 10px;
-            background: #2c2c2c; 
-            border: 1px solid #444;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        .sum-label { font-size: 11px; color: #aaa; margin-bottom: 4px; text-transform: uppercase; }
-        .sum-val { font-size: 20px; font-weight: bold; }
-
-        /* Text Colors */
-        .text-p { color: #2ecc71; } 
-        .text-a { color: #e74c3c; } 
-        .text-h { color: #f39c12; } 
-
-        /* Calendar Grid */
         .calendar-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px;
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; margin-top: 15px;
         }
         .cal-day {
             aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
             background: var(--bg); border-radius: 8px; border: 1px solid var(--border);
-            font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.1s;
-            user-select: none; color: var(--text);
+            font-weight: bold; font-size: 14px; color: var(--text);
         }
-        
-        /* 🎨 STATUS COLORS */
-        .is-present { background-color: #27ae60 !important; color: white !important; border-color: #27ae60 !important; }
-        .is-absent  { background-color: #c0392b !important; color: white !important; border-color: #c0392b !important; }
-        .is-holiday { background-color: #f39c12 !important; color: white !important; border-color: #d35400 !important; }
+        .is-present { background-color: #27ae60 !important; color: white !important; border:none; }
+        .is-absent  { background-color: #c0392b !important; color: white !important; border:none; }
+        .is-holiday { background-color: #f39c12 !important; color: white !important; border:none; }
 
         .btn-close { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-weight: bold; }
-        .btn-holiday { width: 100%; padding: 12px; background: #f39c12; border: none; border-radius: 8px; color: white; font-weight: bold; margin-bottom: 10px; }
 
         /* Theme Toggle */
         .theme-toggle {
@@ -118,11 +133,12 @@
         </div>
 
         <div class="controls-row">
-            <input type="month" id="attMonth" onchange="loadStudents()" style="flex:2;">
-            <button onclick="openGlobalHolidayModal()" style="flex:1; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer;">🏖️ Holidays</button>
+            <input type="date" id="attDate" onchange="loadDailyView()" style="flex:2;">
+            <button onclick="openGlobalHolidayModal()" style="flex:1; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer; color:var(--text); font-weight:bold;">🏖️ Holidays</button>
         </div>
+        
         <div class="controls-row">
-             <select id="attClass" onchange="loadStudents()">
+             <select id="attClass" onchange="loadDailyView()">
                 <option value="6">Class 6</option>
                 <option value="7">Class 7</option>
                 <option value="8">Class 8</option>
@@ -131,49 +147,38 @@
             </select>
         </div>
 
+        <div class="daily-summary">
+            <div class="d-card bg-present">
+                <h4>Present</h4>
+                <span id="sumP">0</span>
+            </div>
+            <div class="d-card bg-absent">
+                <h4>Absent</h4>
+                <span id="sumA">0</span>
+            </div>
+        </div>
+
         <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
 
         <div id="attList"></div>
+        <div style="height: 60px;"></div>
     </div>
 
-    <div id="attModal" class="modal">
+    <div id="historyModal" class="modal">
         <div class="modal-content">
-            <h3 id="modalName" style="margin:0 0 5px 0; color:var(--text);">Student Name</h3>
-            <p id="modalSubtitle" style="font-size:12px; color:var(--placeholder); margin-bottom:20px;"></p>
-
-            <div class="summary-row">
-                <div class="summary-box">
-                    <span class="sum-label">Present</span>
-                    <span class="sum-val text-p" id="countP">0</span>
-                </div>
-                <div class="summary-box">
-                    <span class="sum-label">Absent</span>
-                    <span class="sum-val text-a" id="countA">0</span>
-                </div>
-                <div class="summary-box">
-                    <span class="sum-label">Holiday</span>
-                    <span class="sum-val text-h" id="countH">0</span>
-                </div>
-            </div>
-
-            <div class="calendar-grid" id="calGrid"></div>
-
-            <p style="font-size:11px; color:var(--placeholder); margin-top:-10px; margin-bottom:15px;">
-                Tap to toggle: Present 🟢 / Absent 🔴
-            </p>
-
-            <button class="btn-close" onclick="closeAttModal()">Close</button>
+            <h3 id="histName" style="margin:0; color:var(--text);">Student Name</h3>
+            <p style="font-size:12px; color:var(--placeholder); margin-bottom:10px;">Full Month View</p>
+            <div class="calendar-grid" id="histGrid"></div>
+            <button class="btn-close" onclick="document.getElementById('historyModal').style.display='none'">Close</button>
         </div>
     </div>
 
     <div id="holidayModal" class="modal">
         <div class="modal-content">
             <h3 style="margin:0 0 5px 0; color:var(--text);">Manage Holidays</h3>
-            <p style="font-size:12px; color:var(--placeholder); margin-bottom:20px;">Tap days to mark as School Holiday 🏖️</p>
-            
+            <p style="font-size:12px; color:var(--placeholder); margin-bottom:20px;">Tap days to mark as School Holiday</p>
             <div class="calendar-grid" id="holidayGrid"></div>
-            
-            <button class="btn-close" onclick="document.getElementById('holidayModal').style.display='none'; loadStudents();">Done</button>
+            <button class="btn-close" onclick="document.getElementById('holidayModal').style.display='none'; loadDailyView();">Done</button>
         </div>
     </div>
 
@@ -190,18 +195,14 @@
     </div>
 
     <script>
-        let currentStudentRoll = null;
-
         window.onload = function() {
             const savedTheme = localStorage.getItem("theme") || "light";
             document.body.setAttribute("data-theme", savedTheme);
             document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
 
-            const date = new Date();
-            const monthStr = date.toISOString().slice(0, 7); 
-            document.getElementById("attMonth").value = monthStr;
-
-            loadStudents();
+            // Set default date to TODAY
+            document.getElementById("attDate").valueAsDate = new Date();
+            loadDailyView();
         };
 
         function toggleLocalTheme() {
@@ -212,16 +213,33 @@
             document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
         }
 
-        // 1. Load Student List
-        function loadStudents() {
+        // 1. LOAD DAILY LIST & BUTTONS
+        function loadDailyView() {
             const cls = document.getElementById("attClass").value;
-            const students = JSON.parse(localStorage.getItem("students")) || [];
+            const fullDate = document.getElementById("attDate").value; // "YYYY-MM-DD"
             
+            if(!fullDate) return;
+
+            const [year, month, day] = fullDate.split('-');
+            const monthStr = `${year}-${month}`; // Key for storage: YYYY-MM
+            const dayNum = parseInt(day);
+
+            // Get Data
+            const students = JSON.parse(localStorage.getItem("students")) || [];
+            const attData = JSON.parse(localStorage.getItem(`att_${cls}_${monthStr}`)) || {};
+            const holidays = JSON.parse(localStorage.getItem(`holidays_${monthStr}`)) || [];
+
+            const isHoliday = holidays.includes(dayNum);
+
+            // Filter Class
             const filtered = students.filter(s => s.studentClass === cls);
             filtered.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
 
             const list = document.getElementById("attList");
             list.innerHTML = "";
+
+            let countP = 0;
+            let countA = 0;
 
             if(filtered.length === 0) {
                 list.innerHTML = "<div style='text-align:center; padding:20px; color:var(--placeholder)'>No students found.</div>";
@@ -229,42 +247,140 @@
             }
 
             filtered.forEach(s => {
+                // Get Status for this specific day
+                const studentRecord = attData[s.roll] || {};
+                const status = studentRecord[dayNum]; // 'P', 'A', or undefined
+
+                // Calculate Totals
+                if(!isHoliday) {
+                    if(status === 'P') countP++;
+                    if(status === 'A') countA++;
+                }
+
+                // Determine Button Appearance
+                let btnClass = "btn-u";
+                let btnText = "Mark";
+                
+                if (isHoliday) {
+                    btnClass = "btn-h";
+                    btnText = "Holiday";
+                } else if (status === 'P') {
+                    btnClass = "btn-p";
+                    btnText = "Present";
+                } else if (status === 'A') {
+                    btnClass = "btn-a";
+                    btnText = "Absent";
+                }
+
                 list.innerHTML += `
-                <div class="student-item" onclick="openAttModal('${s.roll}', '${s.name}')">
-                    <div>
-                        <div style="font-weight:bold; color:var(--text);">${s.name}</div>
-                        <div style="font-size:12px; color:var(--placeholder);">Roll: ${s.roll}</div>
+                <div class="student-row">
+                    <div class="stu-info" onclick="openHistoryModal('${s.roll}', '${s.name}')">
+                        <h4>${s.name}</h4>
+                        <p>Roll: ${s.roll}</p>
                     </div>
-                    <div style="font-size:20px;">📅</div>
+                    <button class="att-btn ${btnClass}" onclick="toggleAttendance('${s.roll}', ${isHoliday})">
+                        ${btnText}
+                    </button>
                 </div>`;
             });
+
+            // Update Header Counts
+            document.getElementById("sumP").innerText = countP;
+            document.getElementById("sumA").innerText = countA;
         }
 
-        // 2. GLOBAL HOLIDAY MANAGER
-        function openGlobalHolidayModal() {
-            const monthStr = document.getElementById("attMonth").value;
-            const [year, month] = monthStr.split('-').map(Number);
+        // 2. TOGGLE ATTENDANCE LOGIC
+        function toggleAttendance(roll, isHoliday) {
+            if(isHoliday) {
+                alert("Cannot mark attendance on a Holiday! Unmark the holiday first.");
+                return;
+            }
+
+            const cls = document.getElementById("attClass").value;
+            const fullDate = document.getElementById("attDate").value; 
+            const [year, month, day] = fullDate.split('-');
+            const monthStr = `${year}-${month}`;
+            const dayNum = parseInt(day);
+
+            const storageKey = `att_${cls}_${monthStr}`;
+            let data = JSON.parse(localStorage.getItem(storageKey)) || {};
+            let studentData = data[roll] || {};
+
+            // Cycle: Null -> P -> A -> Null
+            const current = studentData[dayNum];
+            let nextStatus = null;
+
+            if (!current) nextStatus = 'P';
+            else if (current === 'P') nextStatus = 'A';
+            else if (current === 'A') nextStatus = null; // Back to unmarked
+
+            if (nextStatus) studentData[dayNum] = nextStatus;
+            else delete studentData[dayNum];
+
+            data[roll] = studentData;
+            localStorage.setItem(storageKey, JSON.stringify(data));
+
+            // Reload UI to show changes
+            loadDailyView();
+        }
+
+        // 3. SHOW HISTORY MODAL (Read-Only View)
+        function openHistoryModal(roll, name) {
+            const fullDate = document.getElementById("attDate").value;
+            const [year, month] = fullDate.split('-');
+            const monthStr = `${year}-${month}`;
             const daysInMonth = new Date(year, month, 0).getDate();
-            const grid = document.getElementById("holidayGrid");
+
+            document.getElementById("histName").innerText = name;
+            
+            const cls = document.getElementById("attClass").value;
+            const attData = JSON.parse(localStorage.getItem(`att_${cls}_${monthStr}`)) || {};
+            const holidays = JSON.parse(localStorage.getItem(`holidays_${monthStr}`)) || [];
+            const studentRecord = attData[roll] || {};
+
+            const grid = document.getElementById("histGrid");
             grid.innerHTML = "";
 
-            // Get Global Holidays
-            const holidayKey = `holidays_${monthStr}`;
-            let holidays = JSON.parse(localStorage.getItem(holidayKey)) || [];
-
-            for(let i = 1; i <= daysInMonth; i++) {
+            for(let i=1; i<=daysInMonth; i++) {
                 const dayDiv = document.createElement("div");
                 dayDiv.className = "cal-day";
                 dayDiv.innerText = i;
 
                 if(holidays.includes(i)) dayDiv.classList.add("is-holiday");
+                else if(studentRecord[i] === 'P') dayDiv.classList.add("is-present");
+                else if(studentRecord[i] === 'A') dayDiv.classList.add("is-absent");
+
+                grid.appendChild(dayDiv);
+            }
+
+            document.getElementById("historyModal").style.display = "flex";
+        }
+
+        // 4. HOLIDAY MANAGER
+        function openGlobalHolidayModal() {
+            const fullDate = document.getElementById("attDate").value;
+            const [year, month] = fullDate.split('-');
+            const monthStr = `${year}-${month}`;
+            const daysInMonth = new Date(year, month, 0).getDate();
+            
+            const grid = document.getElementById("holidayGrid");
+            grid.innerHTML = "";
+
+            const holidayKey = `holidays_${monthStr}`;
+            let holidays = JSON.parse(localStorage.getItem(holidayKey)) || [];
+
+            for(let i=1; i<=daysInMonth; i++) {
+                const dayDiv = document.createElement("div");
+                dayDiv.className = "cal-day";
+                dayDiv.innerText = i;
+                if(holidays.includes(i)) dayDiv.classList.add("is-holiday");
 
                 dayDiv.onclick = function() {
                     if(holidays.includes(i)) {
-                        holidays = holidays.filter(d => d !== i); // Remove
+                        holidays = holidays.filter(d => d !== i);
                         dayDiv.classList.remove("is-holiday");
                     } else {
-                        holidays.push(i); // Add
+                        holidays.push(i);
                         dayDiv.classList.add("is-holiday");
                     }
                     localStorage.setItem(holidayKey, JSON.stringify(holidays));
@@ -274,85 +390,9 @@
             document.getElementById("holidayModal").style.display = "flex";
         }
 
-        // 3. STUDENT ATTENDANCE MODAL
-        function openAttModal(roll, name) {
-            currentStudentRoll = roll;
-            document.getElementById("modalName").innerText = name;
-            const monthVal = document.getElementById("attMonth").value; 
-            document.getElementById("modalSubtitle").innerText = `Attendance for ${monthVal}`;
-            
-            generateCalendar(monthVal);
-            document.getElementById("attModal").style.display = "flex";
-        }
-
-        function closeAttModal() {
-            document.getElementById("attModal").style.display = "none";
-        }
-
-        function generateCalendar(monthStr) {
-            const [year, month] = monthStr.split('-').map(Number);
-            const daysInMonth = new Date(year, month, 0).getDate();
-            const grid = document.getElementById("calGrid");
-            grid.innerHTML = "";
-
-            // Get Data
-            const cls = document.getElementById("attClass").value;
-            const storageKey = `att_${cls}_${monthStr}`; 
-            let data = JSON.parse(localStorage.getItem(storageKey)) || {};
-            let studentData = data[currentStudentRoll] || {};
-
-            // Get Holidays
-            const holidayKey = `holidays_${monthStr}`;
-            let holidays = JSON.parse(localStorage.getItem(holidayKey)) || [];
-
-            let p = 0, a = 0, h = 0;
-
-            for(let i = 1; i <= daysInMonth; i++) {
-                const dayDiv = document.createElement("div");
-                dayDiv.className = "cal-day";
-                dayDiv.innerText = i;
-                
-                const isGlobalHoliday = holidays.includes(i);
-                const status = studentData[i]; 
-
-                if (isGlobalHoliday) {
-                    dayDiv.classList.add("is-holiday"); // Forced Holiday
-                    h++;
-                } else if(status === 'P') {
-                    dayDiv.classList.add("is-present");
-                    p++;
-                } else if(status === 'A') {
-                    dayDiv.classList.add("is-absent");
-                    a++;
-                }
-
-                // Toggle Logic (Only if NOT a holiday)
-                dayDiv.onclick = function() {
-                    if(isGlobalHoliday) return; // Can't change global holiday here
-
-                    let newStatus = null;
-                    if(!status) newStatus = 'P';
-                    else if(status === 'P') newStatus = 'A';
-                    else if(status === 'A') newStatus = null; // Clear
-
-                    if(newStatus) studentData[i] = newStatus;
-                    else delete studentData[i];
-
-                    data[currentStudentRoll] = studentData;
-                    localStorage.setItem(storageKey, JSON.stringify(data));
-                    generateCalendar(monthStr); // Refresh
-                };
-
-                grid.appendChild(dayDiv);
-            }
-
-            document.getElementById("countP").innerText = p;
-            document.getElementById("countA").innerText = a;
-            document.getElementById("countH").innerText = h;
-        }
     </script>
     
-    <script src="script.js?v=attendance_final1"></script>
+    <script src="script.js?v=attendance_daily_final"></script>
 
 </body>
 </html>
