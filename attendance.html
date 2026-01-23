@@ -172,6 +172,17 @@
         [data-theme="dark"] .nav-item.active { color: #e0b0ff !important; }
         [data-theme="dark"] .nav-item.active::after { background-color: #e0b0ff !important; box-shadow: 0 0 6px rgba(224, 176, 255, 0.6) !important; }
         .nav-item.active .nav-icon { transform: translateY(-2px) !important; }
+
+    /* 🗓️ MONTH LABEL STYLE */
+    .month-indicator {
+        text-align: center; 
+        font-size: 13px; 
+        color: var(--placeholder); 
+        margin-bottom: 15px; 
+        font-weight: bold;
+    }
+
+
     </style>
 </head>
 <body>
@@ -207,6 +218,9 @@
                 <span id="sumA">0</span>
             </div>
         </div>
+
+    <div id="monthLabel" class="month-indicator">Loading...</div>
+
 
         <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
 
@@ -254,19 +268,24 @@
 
 
     <script>
-        // GLOBAL VARIABLES TO HOLD UNSAVED DATA
+        // GLOBAL VARIABLES
         let tempData = {}; 
         let hasUnsavedChanges = false;
+        let lastValidDate = null; // Tracks valid date to revert to
 
-        window.onload = function() {
+        // Use Event Listener to avoid conflicts with external script.js
+        window.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem("theme") || "light";
             document.body.setAttribute("data-theme", savedTheme);
             document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
 
             // Set default date to TODAY
-            document.getElementById("attDate").valueAsDate = new Date();
+            const today = new Date();
+            document.getElementById("attDate").valueAsDate = today;
+            lastValidDate = document.getElementById("attDate").value; // Store initial
+            
             loadDailyView();
-        };
+        });
 
         function toggleLocalTheme() {
             const current = document.body.getAttribute("data-theme");
@@ -276,29 +295,39 @@
             document.getElementById("themeBtn").innerText = newTheme === "dark" ? "☀️" : "🌙";
         }
 
-        // 1. LOAD DATA (INTO TEMP OBJECT)
+        // 1. LOAD DATA
         function loadDailyView() {
-            // Warn if switching with unsaved changes
+            const input = document.getElementById("attDate");
+            
+            // Check for unsaved changes before switching date
             if(hasUnsavedChanges) {
-                if(!confirm("You have unsaved changes! Discard them?")) {
-                    return; // Abort switch
+                if(!confirm("You have unsaved changes! Discard them and switch date?")) {
+                    // User canceled -> Revert date input
+                    input.value = lastValidDate;
+                    return; 
                 }
             }
 
+            // Safe to switch
             hasUnsavedChanges = false;
             document.getElementById("saveBar").classList.remove("show");
+            lastValidDate = input.value; // Update valid date
 
             const cls = document.getElementById("attClass").value;
-            const fullDate = document.getElementById("attDate").value; 
+            const fullDate = input.value; 
             if(!fullDate) return;
 
             const [year, month, day] = fullDate.split('-');
             const monthStr = `${year}-${month}`; 
             const dayNum = parseInt(day);
 
+            // Update Label
+            const dateObj = new Date(year, month - 1, day);
+            const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+            document.getElementById("monthLabel").innerText = `Viewing Data for: ${monthName}`;
+
             // Fetch from storage
             const students = JSON.parse(localStorage.getItem("students")) || [];
-            // Clone data to modify in memory
             const storedData = JSON.parse(localStorage.getItem(`att_${cls}_${monthStr}`)) || {};
             tempData = storedData; 
 
@@ -357,21 +386,19 @@
             document.getElementById("sumA").innerText = countA;
         }
 
-        // 2. TOGGLE ATTENDANCE (UPDATES TEMP DATA ONLY)
+        // 2. TOGGLE ATTENDANCE
         function toggleAttendance(roll, isHoliday, btnElement) {
             if(isHoliday) {
                 alert("Cannot mark attendance on a Holiday!");
                 return;
             }
 
-            // Mark as unsaved
             hasUnsavedChanges = true;
             document.getElementById("saveBar").classList.add("show");
 
             const fullDate = document.getElementById("attDate").value; 
             const dayNum = parseInt(fullDate.split('-')[2]);
 
-            // Init student record in temp data if missing
             if(!tempData[roll]) tempData[roll] = {};
 
             const current = tempData[roll][dayNum];
@@ -388,15 +415,12 @@
                 nextStatus = null; nextClass = 'btn-u'; nextText = 'Mark'; 
             }
 
-            // Update Temp Data
             if (nextStatus) tempData[roll][dayNum] = nextStatus;
             else delete tempData[roll][dayNum];
 
-            // Visual Update (Instant)
             btnElement.className = `att-btn ${nextClass}`;
             btnElement.innerText = nextText;
 
-            // Recalculate Sums
             recalcSums(dayNum);
         }
 
@@ -410,11 +434,11 @@
             document.getElementById("sumA").innerText = a;
         }
 
-        // 3. SAVE FUNCTION (COMMITS TO STORAGE)
+        // 3. SAVE & DISCARD
         function saveAttendance() {
             const cls = document.getElementById("attClass").value;
             const fullDate = document.getElementById("attDate").value;
-            const monthStr = fullDate.substring(0, 7); // YYYY-MM
+            const monthStr = fullDate.substring(0, 7); 
 
             localStorage.setItem(`att_${cls}_${monthStr}`, JSON.stringify(tempData));
             
@@ -427,16 +451,13 @@
             setTimeout(() => btn.innerText = originalText, 2000);
         }
 
-    // 🛑 NEW: DISCARD CHANGES (Undo accidental clicks)
-    function discardChanges() {
-        hasUnsavedChanges = false;
-        document.getElementById("saveBar").classList.remove("show");
-        // Reload data to wipe temporary changes
-        loadDailyView(); 
-    }
-
-
-
+        function discardChanges() {
+            if(confirm("Discard all changes?")) {
+                hasUnsavedChanges = false;
+                document.getElementById("saveBar").classList.remove("show");
+                loadDailyView(); // Reload from storage
+            }
+        }
 
         // 4. HISTORY & HOLIDAYS
         function openHistoryModal(roll, name) {
@@ -446,7 +467,7 @@
             const daysInMonth = new Date(year, month, 0).getDate();
 
             document.getElementById("histName").innerText = name;
-            const attData = tempData; // Use working data
+            const attData = tempData; 
             const holidays = JSON.parse(localStorage.getItem(`holidays_${monthStr}`)) || [];
             const studentRecord = attData[roll] || {};
 
@@ -498,7 +519,7 @@
     </script>
 
     
-    <script src="script.js?v=attendance_daily_final111"></script>
+    <script src="script.js?v=attendance_daily_final1111"></script>
 
 </body>
 </html>
